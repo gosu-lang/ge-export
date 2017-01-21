@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile 'io.ratpack:ratpack-core:1.4.2'
+  compile 'io.ratpack:ratpack-test:1.4.2'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.8.2'
+  runtime 'org.slf4j:slf4j-simple:1.7.21'
+}
