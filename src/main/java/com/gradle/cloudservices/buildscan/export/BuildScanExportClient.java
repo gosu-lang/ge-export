@@ -24,7 +24,10 @@ import java.util.function.Function;
 
 public class BuildScanExportClient {
 
-  private static final String SERVER = "https://scans.grdev.net";
+  // store cert, taken from https://www.grim.se/guide/jre-cert
+  // $ keytool -import -alias kyle-gradle-vm01 -keystore /java/64/jdk1.8.0_92/jre/lib/security/cacerts -file /home/kmoore/Desktop/kyle-gradle-vm01.crt
+  private static final String SERVER = "https://kyle-gradle-vm01";
+//  private static final String SERVER = "https://scans.grdev.net";
   private static final int PARALLELISM = 100; // number of build event streams to consume in parallel
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -43,7 +46,7 @@ public class BuildScanExportClient {
       ServerSentEventStreamClient sseClient = ServerSentEventStreamClient.of(httpClient);
 
       Instant now = Instant.now();
-      Instant since = now.minus(Duration.ofDays(7));
+      Instant since = now.minus(Duration.ofDays(12));
       long timestamp = since.toEpochMilli();
       String timestampString = Long.toString(timestamp);
 
@@ -71,7 +74,8 @@ public class BuildScanExportClient {
                       return sseClient.request(buildEventUri, GZIP)
                           .flatMap(events ->
                               new FindFirstPublisher<>(events, e -> {
-                                if ("BuildAgent_1_0".equals(e.getEvent())) {
+//                                return Optional.ofNullable(events.toList());
+                                if ("BuildAgent_1_0".equals(e.getEvent())) { //BuildMetadata : DefaultEvent, BuildAgent_1_0, ??
                                   JsonNode json = parse(e.getData());
                                   String username = json.get("data").get("username").asText();
                                   return Optional.ofNullable(username).orElse("null");
