@@ -9,18 +9,25 @@ import ratpack.func.Action;
 import ratpack.http.HttpUrlBuilder;
 import ratpack.http.client.HttpClient;
 import ratpack.http.client.RequestSpec;
+import ratpack.sse.Event;
 import ratpack.sse.ServerSentEventStreamClient;
+import ratpack.stream.TransformablePublisher;
 import ratpack.test.exec.ExecHarness;
 
 import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BuildScanExportClient {
 
@@ -34,10 +41,53 @@ public class BuildScanExportClient {
   private static final Action<RequestSpec> GZIP = r -> r.getHeaders().set("Accept-Encoding", "gzip");
 
   public static void main(String[] args) throws Exception {
+    List<Event<?>> listofbuilds = getListOfBuilds();
+    listofbuilds.forEach( build -> {
+      System.out.printf("Build %s with type %s has data %s\n", build.getId(), build.getEvent(), build.getData());
+    });
     Stats stats = readStats();
     System.out.println(stats.map);
   }
 
+  private static List<Event<?>> getListOfBuilds() throws Exception {
+//    List<Object> retval = new ArrayList<>();
+    List<Event<?>> retval = null;
+
+    URI base = new URI(SERVER);
+
+    retval = ExecHarness.yieldSingle(execution -> {
+      HttpClient httpClient = HttpClient.of( s -> s.poolSize( PARALLELISM ) );
+      ServerSentEventStreamClient sseClient = ServerSentEventStreamClient.of( httpClient );
+
+      Instant now = Instant.now();
+      Instant since = now.minus( Duration.ofDays( 18 ) );
+      long timestamp = since.toEpochMilli();
+      String timestampString = Long.toString( timestamp );
+
+      URI listingUri = HttpUrlBuilder.base( base )
+          .path( "build-export/v1/builds/since" )
+          .segment( timestampString )
+          .params( "stream", "" )
+          .build();
+
+       return sseClient.request(listingUri, GZIP)
+           .flatMap(buildStream ->
+           new GroupingPublisher<>(buildStream, PARALLELISM)
+               .bindExec()
+               .toPromise()
+           );
+//           .apply( builds -> builds.map( build -> build.toPromise()));
+//          .flatMap(buildStream -> 
+//                new GroupingPublisher<>( buildStream, PARALLELISM )
+//                    .bindExec()
+//                    .wiretap( builds -> builds.toString() )      
+//          );
+    }).getValueOrThrow();
+    
+    return retval;
+    
+  }
+  
   private static Stats readStats() throws Exception {
     URI base = new URI(SERVER);
 
@@ -46,7 +96,7 @@ public class BuildScanExportClient {
       ServerSentEventStreamClient sseClient = ServerSentEventStreamClient.of(httpClient);
 
       Instant now = Instant.now();
-      Instant since = now.minus(Duration.ofDays(12));
+      Instant since = now.minus(Duration.ofDays(18));
       long timestamp = since.toEpochMilli();
       String timestampString = Long.toString(timestamp);
 

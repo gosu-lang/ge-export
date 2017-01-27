@@ -7,12 +7,12 @@ import ratpack.func.Function;
 import ratpack.stream.TransformablePublisher;
 
 
-final class FindFirstPublisher<I, O> implements TransformablePublisher<O> {
+public final class FindFirstPublisher<I, O> implements TransformablePublisher<O> {
 
   private final Publisher<I> publisher;
   private final Function<? super I, ? extends O> finder;
 
-  FindFirstPublisher(Publisher<I> publisher, Function<? super I, ? extends O> finder) {
+  public FindFirstPublisher(Publisher<I> publisher, Function<? super I, ? extends O> finder) {
     this.publisher = publisher;
     this.finder = finder;
   }

@@ -8,12 +8,12 @@ import ratpack.stream.TransformablePublisher;
 import java.util.ArrayList;
 import java.util.List;
 
-final class GroupingPublisher<T> implements TransformablePublisher<List<T>> {
+final public class GroupingPublisher<T> implements TransformablePublisher<List<T>> {
 
   private final Publisher<T> publisher;
   private final int num;
 
-  GroupingPublisher(Publisher<T> publisher, int num) {
+  public GroupingPublisher(Publisher<T> publisher, int num) {
     this.publisher = publisher;
     this.num = num;
   }
