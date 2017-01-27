@@ -7,6 +7,10 @@ repositories {
   jcenter()
 }
 
+wrapper {
+  gradleVersion '3.3'
+}
+
 dependencies {
   compile 'org.gosu-lang.gosu:gosu-core-api:1.14.3'
   compile 'org.gosu-lang.gosu:gosu-core:1.14.3'
@@ -19,9 +23,9 @@ dependencies {
 
 compileGosu {
   classpath = tasks.getByName('compileJava').outputs.files + classpath
-  gosuOptions.forkOptions.with {
-    jvmArgs += ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y'] //debug on linux/OS X
-  }
+//  gosuOptions.forkOptions.with {
+//    jvmArgs += ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y'] //debug on linux/OS X
+//  }
 }
 compileTestGosu {
   classpath = tasks.getByName('compileTestJava').outputs.files + classpath
