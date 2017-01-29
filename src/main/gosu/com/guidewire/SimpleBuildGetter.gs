@@ -1,6 +1,5 @@
 package com.guidewire
 
-
 uses com.fasterxml.jackson.databind.ObjectMapper
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
@@ -43,6 +42,14 @@ class SimpleBuildGetter {
     print(Date.from(Instant.ofEpochMilli(data.timestamp))) //todo this could easily be an enhancement
     
     var structures = generateStructuresForAllEventTypes(firstBuild)
+    structures.each( \ event -> {
+      var typename = event.getFirst()
+      var source = Json.fromJson(event.getSecond()).toStructure(typename)
+      //todo write to file; check for duplicates?
+      var x = 1
+
+    } )
+
     var x = 1
   }
 
@@ -92,19 +99,13 @@ class SimpleBuildGetter {
       print("\nParsing build " + event.Id)
       var buildEventUri = buildUriFunction(event.Id)
       return sseClient.request(buildEventUri, GZIP)
-        .flatMap(\events ->
-            new FindFirstPublisher(events, \e -> {
-              if (e typeis Event and e.Id != event.Id) { //why I need a cast?
-                return generateStructureFromEvent(e) 
-              } else {
-                return null
-              }
-//              return generateStructureFromEvent(e)
-            }).toPromise()
-        )
-
+          .flatMap( \ events -> events.toList() )
     })
-    return {retval.getValueOrThrow()} as List<Pair<String, String>>
+
+    var x = (retval.getValueOrThrow() as List<Event>)
+        .where( \ e -> e.Id != event.Id )
+        .map( \ e -> generateStructureFromEvent(e))
+    return x// as List<Pair<String, String>>
   }
   
   private static function generateStructureFromEvent(event : Event) : Pair<String, String> {
