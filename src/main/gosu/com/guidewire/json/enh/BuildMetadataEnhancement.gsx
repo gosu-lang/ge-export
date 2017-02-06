@@ -1,5 +1,6 @@
-package com.guidewire.json
+package com.guidewire.json.enh
 
+uses com.guidewire.json.BuildMetadata
 uses com.guidewire.BuildScanExportClient
 uses ratpack.sse.Event
 

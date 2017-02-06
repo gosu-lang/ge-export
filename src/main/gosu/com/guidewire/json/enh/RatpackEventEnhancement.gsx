@@ -1,4 +1,4 @@
-package com.guidewire
+package com.guidewire.json.enh
 
 uses ratpack.sse.Event
 
@@ -8,10 +8,6 @@ enhancement RatpackEventEnhancement: Event {
     return gw.lang.reflect.json.Json.fromJson( this.Data )
   }
 
-//  property get EventType() : Type {
-//    return this.IntrinsicType
-//  }
-  
   function TypeMatches<R>(eventType: Type<R>) : boolean {
     return this.Event == eventType.RelativeName
   }

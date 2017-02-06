@@ -1,4 +1,4 @@
-package com.guidewire
+package com.guidewire.json.enh
 
 uses ratpack.sse.Event
 

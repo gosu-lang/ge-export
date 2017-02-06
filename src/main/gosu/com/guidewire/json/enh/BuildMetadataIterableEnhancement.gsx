@@ -1,4 +1,6 @@
-package com.guidewire.json
+package com.guidewire.json.enh
+
+uses com.guidewire.json.BuildMetadata
 
 uses java.time.Duration
 
