@@ -1,121 +1,162 @@
 package com.guidewire
 
-uses java.lang.*
-uses com.fasterxml.jackson.databind.JsonNode
-uses com.fasterxml.jackson.databind.ObjectMapper
-uses com.google.common.collect.Iterables
+uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
+uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
+uses com.guidewire.json.BuildMetadata
 uses ratpack.exec.Promise
 uses ratpack.exec.util.ParallelBatch
-uses ratpack.func.Action
 uses ratpack.http.HttpUrlBuilder
 uses ratpack.http.client.HttpClient
 uses ratpack.http.client.RequestSpec
+uses ratpack.sse.Event
 uses ratpack.sse.ServerSentEventStreamClient
+uses ratpack.stream.TransformablePublisher
 uses ratpack.test.exec.ExecHarness
-uses java.io.IOException
+
 uses java.net.URI
-uses java.time.Duration
 uses java.time.Instant
-uses java.util.Optional
-uses java.util.concurrent.ConcurrentHashMap
-uses java.util.concurrent.ConcurrentMap
-uses java.util.concurrent.atomic.AtomicInteger
-uses java.util.function.Function
-uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
-uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
-
-
+uses java.time.ZoneOffset
+uses java.time.ZonedDateTime
 
 class BuildScanExportClient {
 
-  static final var SERVER = "https://kyle-gradle-vm01"
-  static final var PARALLELISM = 100
+  private static function getPropertyByName(name : String) : String {
+    using(var fis = BuildScanExportClient.Class.ClassLoader.getResourceAsStream("server-config.properties")) {
+      var props = new Properties()
+      props.load(fis)
+      return props.getProperty(name)
+    }
+  }
+  
+  static final var _server : String as readonly SERVER = getPropertyByName("serverUrl")
+  static final var _parallelism : int as readonly PARALLELISM = getPropertyByName("serverParallelism").toInt()
 
-  static final var OBJECT_MAPPER = new ObjectMapper()
-  static final var GZIP : block(rs:RequestSpec) : void = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
+  static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
-  static function main(args : String[]) {
-    var stats = readStats() as Stats
-    System.out.println(stats.zmap)
+  static function getBuildById(buildId : String) : BuildMetadata {
+    return getFirstEventForBuild(BuildMetadata, buildId)
   }
 
-  static function readStats() : Object {
+  static function getMostRecentBuilds(n : int) : List<BuildMetadata> {
+    return getListOfBuilds().getMostRecent(n)
+  }
+  
+  /**
+   * Gets all BuildMetadata events from beginning of time, defined as 2016-12-15 00:00 UTC
+   * @return List of Events; all Data properties are assignable to BuildMetadata
+   */
+  static function getListOfBuilds() : List<BuildMetadata> {
+    return getListOfBuildsSince(ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC))
+  }
+
+  /**
+   * Gets all BuildMetadata events between the provided dates (inclusive)
+   * @return List of Events; all Data properties are assignable to BuildMetadata
+   */
+  static function getListOfBuildsBetween(from : ZonedDateTime, to : ZonedDateTime) : List<BuildMetadata> {
+    var builds = getListOfBuildsSince(from)
+    return builds.where( \ e -> e.timestamp <= to.toInstant().toEpochMilli())
+  }
+  
+  /**
+   * Gets all BuildMetadata events since the provided date
+   * @return List of Events; all Data properties are assignable to BuildMetadata
+   */
+  static function getListOfBuildsSince(date : ZonedDateTime) : List<BuildMetadata> {
     var base = new URI(SERVER)
-
-    var result = ExecHarness.yieldSingle(\exec -> {
-      var httpClient = HttpClient.of(\spec -> spec.poolSize(PARALLELISM))
+    
+    var retval = ExecHarness.yieldSingle(\ exec -> {
+      var httpClient = HttpClient.of(\ s -> s.poolSize(PARALLELISM))
       var sseClient = ServerSentEventStreamClient.of(httpClient)
-
-      var now = Instant.now()
-      var since = now.minus(Duration.ofDays(18))
-      var timestamp = since.toEpochMilli()
+      
+      var timestamp = Instant.from(date).toEpochMilli()
       var timestampString = Long.toString(timestamp)
-
+      
       var listingUri = HttpUrlBuilder.base(base)
           .path("build-export/v1/builds/since")
           .segment(timestampString, {})
           .params({"stream", ""})
           .build()
-
-      var buildUriFunction: block(s: String): URI = \buildId -> HttpUrlBuilder.base(base)
-          .path("build-export/v1/build")
-          .segment(buildId, {})
-          .segment("events", {})
-          .params({"stream", ""})
-          .build()
-
-//      return sseClient.request(listingUri, GZIP).flatMap(\buildStream -> buildStream.reduce(new Stats(), \s, e -> s))
-      var result = sseClient.request(listingUri, GZIP)
-          .flatMap(\buildStream ->
+      
+      return sseClient.request(listingUri, GZIP)
+          .flatMap(\ buildStream -> 
               new GroupingPublisher(buildStream, PARALLELISM)
                   .bindExec()
-                  .flatMap(\builds -> { //builds : List<Event<?>>
-                    var promises = builds.map(\build -> { // promises : List<Promise<String>> or : Iterable<Promise<String>>
-                      var event = build as ratpack.sse.Event
-                      print("Parsing build " + event.Id)
-                      var buildEventUri = buildUriFunction(event.Id)
-                      return sseClient.request(buildEventUri, GZIP)
-                          .flatMap(\events ->
-                              new FindFirstPublisher(events, \e -> { //TODO why wasn't e's type inferred? //: ratpack.sse.Event 
-                                //var returnValue : Optional<String> = null
-                                if (e typeis ratpack.sse.Event and e.Event == "BuildAgent_1_0") {
-                                  var json = parse(e.Data)
-                                  var username = json.get("data").get("username").asText()
-                                  return Optional.ofNullable(username).orElse("null")
-                                } else {
-                                  return "null"
-                                }
-                              }).toPromise()
-                          )
-
-                    })
-                    return ParallelBatch.of(promises).yield()
-                  })//.toPromise()
-//                  .reduce(new Stats(), \ s : BuildScanExportClient.Stats, r : List<String> -> {
-                  .reduce(new Stats(), \s, r -> {
-                    //r.each(\username -> (s as Stats).zmap.computeIfAbsent(username as String, \u -> new AtomicInteger()).incrementAndGet()) //TODO why wasn't username's type inferred?
-                    return s
-                  })
-          )
-      return result
-      
+                  .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
     
-    return result.getValueOrThrow()
-    
+    return (retval.getValueOrThrow() as List<Event>).whereEventTypeIs(BuildMetadata) //TODO why do I need this cast? Why can't Gosu infer it?
   }
   
-  
-  
-  private static class Stats  {
-//    construct() {
-//      _map = new ConcurrentHashMap<String, AtomicInteger>()
-//    }
-    var _map : ConcurrentMap<String, AtomicInteger> as zmap = new ConcurrentHashMap<String, AtomicInteger>()
-  }
-  
-  private static function parse(json : String) : JsonNode {
-    return OBJECT_MAPPER.readTree(json)
+  static function getAllEventsForBuild(build : BuildMetadata) : List<Event> {
+    return getAllEventsForBuild(build.publicBuildId)
   }
 
+  static function getAllEventsForBuild(publicBuildId : String) : List<Event> {
+    var base = new URI(SERVER)
+
+    var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
+        .path("build-export/v1/build")
+        .segment(buildId, {})
+        .segment("events", {})
+        .params({"stream", ""})
+        .build()
+
+    var retval = ExecHarness.yieldSingle(\exec -> {
+      var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
+      var sseClient = ServerSentEventStreamClient.of(httpClient)
+
+      print("\nParsing build " + publicBuildId)
+      var buildEventUri = buildUriFunction(publicBuildId)
+      return sseClient.request(buildEventUri, GZIP)
+          .flatMap(\events -> events.toList())
+    })
+
+    //filter out the BuildMetadata event, easily recognizable by its Id property
+    var x = (retval.getValueOrThrow() as List<Event>)
+        .where(\e -> e.Id != publicBuildId )
+    return x
+  }
+
+  static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : R {
+    return BuildScanExportClient.getFirstEventForBuild(eventType, build.publicBuildId)
+  }
+  
+  static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
+    var base = new URI(SERVER)
+
+    var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
+        .path("build-export/v1/build")
+        .segment(buildId, {})
+        .segment("events", {})
+        .params({"stream", ""})
+        .build()
+    
+    //var eventForSubtype: block(event : Object): Event = \ e -> (e as Event).Event == eventType.RelativeName ? (e as Event) : null
+
+//    print("\nParsing build " + publicBuildId + ", looking for first " + R.RelativeName) //TODO debug logging?
+
+//    var retval = ExecHarness.yieldSingle(\exec -> {
+    return (ExecHarness.yieldSingle(\exec -> {
+      var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
+      var sseClient = ServerSentEventStreamClient.of(httpClient)
+
+      var buildEventUri = buildUriFunction(publicBuildId)
+      //var promises : Iterable<Promise<Event>> = 
+      return sseClient.request(buildEventUri, GZIP)
+          .flatMap( \ events ->
+              new FindFirstPublisher(events, \ e -> (e as Event).TypeMatches(eventType) ? e as Event : null) //TODO why I need to cast?
+                  .toPromise()
+          )
+//      return values
+    }).getValueOrThrow() as Event).Json as R //TODO why I need to cast?
+
+//    var val = retval.getValueOrThrow() as Event
+//    if(val == null) {
+//      throw new Exception("No such Event ${eventType.RelativeName} for build ${publicBuildId}")
+//    }
+//    print(val)
+//    return val.Json as R //TODO why I need to cast?
+  }
+  
 }

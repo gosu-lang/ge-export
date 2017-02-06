@@ -41,10 +41,10 @@ public class BuildScanExportClient {
   private static final Action<RequestSpec> GZIP = r -> r.getHeaders().set("Accept-Encoding", "gzip");
 
   public static void main(String[] args) throws Exception {
-    List<Event<?>> listofbuilds = getListOfBuilds();
-    listofbuilds.forEach( build -> {
-      System.out.printf("Build %s with type %s has data %s\n", build.getId(), build.getEvent(), build.getData());
-    });
+//    List<Event<?>> listofbuilds = getListOfBuilds();
+//    listofbuilds.forEach( build -> {
+//      System.out.printf("Build %s with type %s has data %s\n", build.getId(), build.getEvent(), build.getData());
+//    });
     Stats stats = readStats();
     System.out.println(stats.map);
   }
@@ -60,7 +60,7 @@ public class BuildScanExportClient {
       ServerSentEventStreamClient sseClient = ServerSentEventStreamClient.of( httpClient );
 
       Instant now = Instant.now();
-      Instant since = now.minus( Duration.ofDays( 18 ) );
+      Instant since = now.minus( Duration.ofDays( 30 ) );
       long timestamp = since.toEpochMilli();
       String timestampString = Long.toString( timestamp );
 
@@ -96,7 +96,7 @@ public class BuildScanExportClient {
       ServerSentEventStreamClient sseClient = ServerSentEventStreamClient.of(httpClient);
 
       Instant now = Instant.now();
-      Instant since = now.minus(Duration.ofDays(18));
+      Instant since = now.minus(Duration.ofDays(30));
       long timestamp = since.toEpochMilli();
       String timestampString = Long.toString(timestamp);
 

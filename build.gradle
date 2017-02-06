@@ -11,12 +11,15 @@ wrapper {
   gradleVersion '3.3'
 }
 
+final String gosuVersion = '1.14.3-json-patch-SNAPSHOT' //can't use 1.14.4+ yet, including 1-X-SNAPSHOT
+
 dependencies {
-  compile 'org.gosu-lang.gosu:gosu-core-api:1.14.3-json-patch-SNAPSHOT'
-  compile 'org.gosu-lang.gosu:gosu-core:1.14.3'
+  compile "org.gosu-lang.gosu:gosu-core-api:$gosuVersion"
+  compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
   compile 'io.ratpack:ratpack-core:1.4.2'
   compile 'io.ratpack:ratpack-test:1.4.2'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.8.2'
+  testCompile 'junit:junit:4.12'
   runtime 'org.slf4j:slf4j-simple:1.7.21'
   runtime files("${System.properties.'java.home'}/../lib/tools.jar")
 }
