@@ -20,16 +20,8 @@ uses java.time.ZonedDateTime
 
 class BuildScanExportClient {
 
-  private static function getPropertyByName(name : String) : String {
-    using(var fis = BuildScanExportClient.Class.ClassLoader.getResourceAsStream("server-config.properties")) {
-      var props = new Properties()
-      props.load(fis)
-      return props.getProperty(name)
-    }
-  }
-  
-  static final var _server : String as readonly SERVER = getPropertyByName("serverUrl")
-  static final var _parallelism : int as readonly PARALLELISM = getPropertyByName("serverParallelism").toInt()
+  static final var _server : String as readonly SERVER = serverconfig.serverUrl
+  static final var _parallelism : int as readonly PARALLELISM = serverconfig.serverParallelism.toInt()
 
   static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
