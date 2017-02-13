@@ -19,5 +19,9 @@ enhancement BuildMetadataIterableEnhancement<T extends BuildMetadata>: Iterable<
   function getMostRecent(n: int) : List<T> {
     return this.toList().subList(Math.max(0, this.getCount() - n), this.getCount())
   }
+
+  function withTag(tag : String) : List<T> {
+    return {} //fixme  
+  }
   
 }

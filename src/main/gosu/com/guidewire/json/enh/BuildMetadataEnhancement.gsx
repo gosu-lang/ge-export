@@ -1,6 +1,6 @@
 package com.guidewire.json.enh
 
-uses com.guidewire.json.BuildMetadata
+uses com.guidewire.json.*
 uses com.guidewire.BuildScanExportClient
 uses ratpack.sse.Event
 
@@ -76,6 +76,14 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
   
   function getFirstEventOfType<R extends Dynamic>(eventType : Type<R>) : R {
     return BuildScanExportClient.getFirstEventForBuild(eventType, this)
+  }
+  
+  function getAllEventsOfType<R extends Dynamic>(eventType : Type<R>) : List<R> {
+    return BuildScanExportClient.getAllEventsForBuild(eventType, this)
+  }
+  
+  function hasTag(tag : String) : boolean {
+    return false //fixme
   }
   
 }
