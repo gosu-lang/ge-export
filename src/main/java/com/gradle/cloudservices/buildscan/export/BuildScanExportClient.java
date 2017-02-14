@@ -127,14 +127,14 @@ public class BuildScanExportClient {
                           .flatMap(events ->
                               new FindFirstPublisher<>(events, e -> {
 //                                return Optional.ofNullable(events.toList());
-                                return Arrays.asList(new DefaultEvent("foo"), new DefaultEvent("foo"), new DefaultEvent("foo"));
-//                                if ("BuildAgent_1_0".equals(e.getEvent())) { //BuildMetadata : DefaultEvent, BuildAgent_1_0, ??
-//                                  JsonNode json = parse(e.getData());
-//                                  String username = json.get("data").get("username").asText();
-//                                  return Optional.ofNullable(username).orElse("null");
-//                                } else {
-//                                  return null;
-//                                }
+//                                return Arrays.asList(new DefaultEvent("foo"), new DefaultEvent("foo"), new DefaultEvent("foo"));
+                                if ("BuildAgent_1_0".equals(e.getEvent())) { //BuildMetadata : DefaultEvent, BuildAgent_1_0, ??
+                                  JsonNode json = parse(e.getData());
+                                  String username = json.get("data").get("username").asText();
+                                  return Optional.ofNullable(username).orElse("null");
+                                } else {
+                                  return null;
+                                }
                               }).toPromise()
                           );
 

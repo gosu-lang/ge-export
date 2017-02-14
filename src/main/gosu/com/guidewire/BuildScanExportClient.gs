@@ -3,6 +3,7 @@ package com.guidewire
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
 uses com.guidewire.json.BuildMetadata
+uses ratpack.exec.ExecResult
 uses ratpack.exec.Promise
 uses ratpack.exec.util.ParallelBatch
 uses ratpack.http.HttpUrlBuilder
@@ -77,7 +78,7 @@ class BuildScanExportClient {
                   .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
     
-    return (retval.getValueOrThrow() as List<Event>).whereEventTypeIs(BuildMetadata) //TODO why do I need this cast? Why can't Gosu infer it? i.e. retval.getValueOrThrow()?.whereEventTypeIs(BuildMetadata)
+    return retval.getValueOrThrow().whereEventTypeIs(BuildMetadata)
   }
   
   static function getAllEventsForBuild(build : BuildMetadata) : List<Event> {
@@ -94,7 +95,7 @@ class BuildScanExportClient {
         .params({"stream", ""})
         .build()
 
-    return (ExecHarness.yieldSingle(\exec -> {
+    return ExecHarness.yieldSingle(\exec -> {
       var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
       var sseClient = ServerSentEventStreamClient.of(httpClient)
 
@@ -102,7 +103,7 @@ class BuildScanExportClient {
       var buildEventUri = buildUriFunction(publicBuildId)
       return sseClient.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
-    }).getValueOrThrow() as List<Event>).where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property
+    }).getValueOrThrow().where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property
   }
 
   static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : R {
@@ -112,7 +113,7 @@ class BuildScanExportClient {
   static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
     var base = new URI(SERVER)
 
-    var buildUriFunction: block(String): URI = \ buildId -> HttpUrlBuilder.base(base)
+    var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")
         .segment(buildId, {})
         .segment("events", {})
@@ -123,20 +124,28 @@ class BuildScanExportClient {
 
 //    print("\nParsing build " + publicBuildId + ", looking for first " + R.RelativeName) //TODO debug logging?
 
-    return (ExecHarness.yieldSingle(\exec -> { // returns ExecResult<T>, "public interface ExecResult<T> extends Result<T>"
+    var result = ExecHarness.yieldSingle( \ exec -> {
       var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
       var sseClient = ServerSentEventStreamClient.of(httpClient)
       var buildEventUri = buildUriFunction(publicBuildId)
 
-      return sseClient.request(buildEventUri, GZIP) // returns Promise<TransformablePublisher<Event<?>>>
-          .flatMap( \ events -> // public <O> Promise<O> flatMap(@Nullable ratpack.func.Function<? super T, ? extends Promise<O>> transformer)
-              new FindFirstPublisher(events, \ e -> e.TypeMatches(eventType) ? e : null) //TODO why I need to cast?
-                  .toPromise()
-          )
-    }).getValueOrThrow() as Event).Json as R //TODO why I need to cast? Result<T>#getValueOrThrow()'s return type is T
+      return sseClient.request(buildEventUri, GZIP)
+        .flatMap( \ events ->
+            new FindFirstPublisher(events, \ e -> e.TypeMatches(eventType) ? e : null)
+                .toPromise()
+        )
+    })
     
+    try {
+      return result.getValueOrThrow().Json as R
+    }
+    catch(npe: NullPointerException) {
+      print("Build ${publicBuildId} did not contain any events of type ${eventType.RelativeName}")
+      return null
+    }
   }
   
+/*  
   static function getAllEventsForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : List<R> {
     return BuildScanExportClient.getAllEventsForBuild(eventType, build.publicBuildId)
   }
@@ -180,5 +189,6 @@ class BuildScanExportClient {
         //.where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property   
     return {}
   }
+  */
   
 }

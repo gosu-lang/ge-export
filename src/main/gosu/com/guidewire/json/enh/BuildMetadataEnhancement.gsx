@@ -16,23 +16,23 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
   }
   
   property get TotalBuildTime() : Duration {
-//    var events = AllEvents
+    var events = AllEvents //fixme inefficient
     var startTime : Long
     var endTime : Long
     
-//    startTime = events
-//      .whereEventTypeIs(BuildStarted_1_0)
-//      .single()
-//      .timestamp
+    startTime = events
+      .whereEventTypeIs(BuildStarted_1_0)
+      .single()
+      .timestamp
 
-    startTime = getFirstEventOfType(BuildStarted_1_0).timestamp
+    //startTime = getFirstEventOfType(BuildStarted_1_0).timestamp
     
     try {
-//      endTime = events
-//        .whereEventTypeIs(BuildFinished_1_0)
-//        .single()
-//        .timestamp
-      endTime = getFirstEventOfType(BuildFinished_1_0).timestamp
+      endTime = events
+        .whereEventTypeIs(BuildFinished_1_0)
+        .single()
+        .timestamp
+      //endTime = getFirstEventOfType(BuildFinished_1_0).timestamp
     } catch(e : IllegalStateException) {
         print("Cound not find BuildFinished event in buildId: " + this.publicBuildId)
     } 
@@ -74,13 +74,13 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
     return BuildScanExportClient.getAllEventsForBuild(this)
   }
   
-  function getFirstEventOfType<R extends Dynamic>(eventType : Type<R>) : R {
-    return BuildScanExportClient.getFirstEventForBuild(eventType, this)
-  }
-  
-  function getAllEventsOfType<R extends Dynamic>(eventType : Type<R>) : List<R> {
-    return BuildScanExportClient.getAllEventsForBuild(eventType, this)
-  }
+//  function getFirstEventOfType<R extends Dynamic>(eventType : Type<R>) : R {
+//    return BuildScanExportClient.getFirstEventForBuild(eventType, this)
+//  }
+//  
+//  function getAllEventsOfType<R extends Dynamic>(eventType : Type<R>) : List<R> {
+//    return BuildScanExportClient.getAllEventsForBuild(eventType, this)
+//  }
   
   function hasTag(tag : String) : boolean {
     return false //fixme

@@ -15,7 +15,7 @@ final class FindFirstPublisher<I, O> implements TransformablePublisher<O> {
     _finder = finder
   }
 
-  function subscribe(subscriber : Subscriber) {
+  override function subscribe(subscriber : Subscriber) {
     _publisher.subscribe(new Subscriber<I>() {
       
       var upstream : Subscription
@@ -46,23 +46,23 @@ final class FindFirstPublisher<I, O> implements TransformablePublisher<O> {
         if (upstream == null) {
           return
         }
-        var out : O
+        var _out : O
         try {
-          out = _finder(i)
+          _out = _finder(i)
         }
         catch (e : Exception) {
           upstream.cancel()
           onError(e)
           return
         }
-        if (out == null) {
+        if (_out == null) {
           if (!open) {
             upstream.request(1)
           }
         } else {
           upstream.cancel()
           upstream = null
-          subscriber.onNext(out)
+          subscriber.onNext(_out)
           subscriber.onComplete()
         }
       }
