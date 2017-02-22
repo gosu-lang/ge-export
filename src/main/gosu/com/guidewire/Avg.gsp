@@ -20,8 +20,11 @@ print(myBuild.UploadedTime)
 //
 print("javac duration: " + myBuild.JavaCompilationTime)
 
-var x = BuildScanExportClient.getFirstEventForBuild(com.guidewire.json.BuildStarted_1_0, "jqjygupj7bq7m")
-var y = BuildScanExportClient.getFirstEventForBuild(com.guidewire.json.BuildFinished_1_0, "jqjygupj7bq7m")
+  // "jqjygupj7bq7m" -> really big, missing BuildFinished event
+  // "6ycdlpmt66pyw" -> normal
+  
+var x = BuildScanExportClient.getFirstEventForBuild(com.guidewire.json.BuildStarted_1_0, "6ycdlpmt66pyw")
+var y = BuildScanExportClient.getFirstEventForBuild(com.guidewire.json.BuildFinished_1_0, "6ycdlpmt66pyw")
   print(x.timestamp)
   print(y?.timestamp)
 
