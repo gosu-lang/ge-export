@@ -3,6 +3,7 @@ package com.guidewire
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
 uses com.guidewire.json.BuildMetadata
+uses com.guidewire.json.BuildMetadataUtil
 uses ratpack.exec.ExecResult
 uses ratpack.exec.Promise
 uses ratpack.exec.util.ParallelBatch
@@ -31,7 +32,7 @@ class BuildScanExportClient {
   }
 
   static function getMostRecentBuilds(n : int) : List<BuildMetadata> {
-    return getListOfBuilds().getMostRecent(n)
+    return BuildMetadataUtil.getMostRecent(n, getListOfBuilds())
   }
   
   /**

@@ -1,3 +1,5 @@
+uses com.guidewire.json.BuildMetadataUtil
+
 var a = BuildScanExportClient.getListOfBuilds()
 
 a.orderBy(\build -> build.timestamp)
@@ -5,10 +7,11 @@ a.orderBy(\build -> build.timestamp)
 
 print('')
 
-a.getMostRecent(3)
- .each(\build -> print("Build ${build.publicBuildId} with ${build.eventCount} events and used Gradle version ${build.gradleVersion}. It was uploaded to the server at ${build.UploadedTime}"))
+var lastThreeBuilds = BuildMetadataUtil.getMostRecent(3, a)
 
-print("Last 3 average build time: " + a.getMostRecent(3).AverageBuildTime)
+lastThreeBuilds.each(\build -> print("Build ${build.publicBuildId} with ${build.eventCount} events and used Gradle version ${build.gradleVersion}. It was uploaded to the server at ${build.UploadedTime}"))
+
+print("Last 3 average build time: " + BuildMetadataUtil.getAverageBuildTime(lastThreeBuilds))
 
 var myBuild = BuildScanExportClient.getBuildById("6ycdlpmt66pyw")
 print(myBuild.UploadedTime)
