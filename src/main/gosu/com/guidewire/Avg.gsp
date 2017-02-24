@@ -7,7 +7,7 @@ a.orderBy(\build -> build.timestamp)
 
 print('')
 
-var lastThreeBuilds = BuildMetadataUtil.getMostRecent(3, a)
+var lastThreeBuilds =  BuildScanExportClient.getMostRecentBuilds(3)
 
 lastThreeBuilds.each(\build -> print("Build ${build.publicBuildId} with ${build.eventCount} events and used Gradle version ${build.gradleVersion}. It was uploaded to the server at ${build.UploadedTime}"))
 

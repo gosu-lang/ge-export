@@ -10,6 +10,7 @@ uses ratpack.sse.ServerSentEventStreamClient
 uses ratpack.test.exec.ExecHarness
 
 uses java.net.URI
+uses java.nio.file.Paths
 
 class BuildEventStructureGenerator {
 
@@ -19,10 +20,10 @@ class BuildEventStructureGenerator {
 
     structures
         .where( \ event -> event.First != "ConfigurationResolutionData_1_0") //skipping for now
-        .each( \ event -> {
-          var typename = event.getFirst()
-          var source = Json.fromJson(event.getSecond()).toStructure(typename)
-          var folderForStructures = java.nio.file.Paths.get("src", {"main", "gosu", "com", "guidewire", "json"}).toFile()
+        .each(\event -> {
+          var typename = event.First
+          var source = Json.fromJson(event.Second).toStructure(typename)
+          var folderForStructures = Paths.get("src", {"main", "gosu", "com", "guidewire", "json"}).toFile()
           var file = new java.io.File(folderForStructures, typename.concat(".gs"))
 //          print(file.AbsolutePath)
           file.write("package com.guidewire.json\n\n" + source)
@@ -49,10 +50,9 @@ class BuildEventStructureGenerator {
           .flatMap(\events -> events.toList())
     })
 
-    var x = (retval.getValueOrThrow() as List<Event>)
-        .where( \ e -> e.Id != event.publicBuildId )
-        .map( \ e -> generateStructureFromEvent(e))
-    return x as List<Pair<String, String>>
+    return retval.getValueOrThrow()
+        .where(\e -> e.Id != event.publicBuildId)
+        .map(\e -> generateStructureFromEvent(e))
   }
 
   private static function generateStructureFromEvent(event : Event) : Pair<String, String> {
