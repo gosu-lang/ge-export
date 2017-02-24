@@ -1,7 +1,5 @@
 package com.guidewire
 
-uses com.guidewire.json.BuildMetadata
-
 uses org.junit.Test
 uses org.junit.Assert
 
@@ -18,18 +16,16 @@ class BuildScanExportClientTest {
 
   @Test
   function retrieveForThePastMonth() {
-    //fixme: kind of flaky test/time bomb...
-    var builds = BuildScanExportClient.getListOfBuildsSince(ZonedDateTime.from(ZonedDateTime.now().minusMonths(1)))
+    var feb1 = ZonedDateTime.of(2017, 2, 1, 0, 0, 0, 0, ZoneId.systemDefault())
+    var builds = BuildScanExportClient.getListOfBuildsSince(ZonedDateTime.from(feb1).minusMonths(1))
     Assert.assertTrue(builds?.HasElements)
   }
 
   @Test
   function retrieveBetweenTwoDates() {
-    //fixme: kind of flaky test/time bomb...
-    var now = ZonedDateTime.now()
-    var fourWeeksAgo = ZonedDateTime.from(now.minusWeeks(4))
+    var dec22PT = ZonedDateTime.of(2016, 12, 22, 0, 0, 0, 0, ZoneId.systemDefault())
     var jan10thPT = ZonedDateTime.of(2017, 1, 10, 0, 0, 0, 0, ZoneId.systemDefault())
-    var builds = BuildScanExportClient.getListOfBuildsBetween(fourWeeksAgo, jan10thPT)
+    var builds = BuildScanExportClient.getListOfBuildsBetween(dec22PT, jan10thPT)
     Assert.assertTrue(builds?.HasElements)
     builds.each(\e -> print(new Date(e.timestamp)))
   }

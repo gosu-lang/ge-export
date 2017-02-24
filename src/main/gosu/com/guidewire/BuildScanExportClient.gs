@@ -79,7 +79,7 @@ class BuildScanExportClient {
                   .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
     
-    return retval.getValueOrThrow().whereEventTypeIs(BuildMetadata)
+    return retval.getValueOrThrow()?.whereEventTypeIs(BuildMetadata)
   }
   
   static function getAllEventsForBuild(build : BuildMetadata) : List<Event> {
