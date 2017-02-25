@@ -1,6 +1,8 @@
 package com.guidewire
 
 uses com.guidewire.json.BuildMetadata
+uses com.guidewire.json.UserTag_1_0
+uses ratpack.sse.Event
 
 uses java.time.ZoneOffset
 uses java.time.ZonedDateTime
@@ -9,7 +11,7 @@ class BuildFilterExecutor {
 
   var _since = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
   var _until = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
-  var _criterion = new ArrayList<AdditionalMatchingCriteria>() //: List<AdditionalMatchingCriteria>
+  var _criterion = new HashMap<AdditionalMatchingCriteria, Boolean>() //: List<AdditionalMatchingCriteria>
 
   function since(since : ZonedDateTime) : BuildFilterExecutor {
     _since = since
@@ -26,7 +28,15 @@ class BuildFilterExecutor {
   }
 
   function tagged(tag : String) : BuildFilterExecutor {
-    _criterion.add( \ func -> true ) //TODO if equals tag then set Satisfied == true
+//    var crit = \ e : Event -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag
+//    
+//    var amc = new AdditionalMatchingCriteria() {
+//      override function apply(e: Event, func: block(Event): boolean): boolean {
+//        return func(e)
+//      }
+//    }
+    
+    _criterion.put( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag, false ) //TODO if equals tag then set Satisfied == true
     return this
   }
 

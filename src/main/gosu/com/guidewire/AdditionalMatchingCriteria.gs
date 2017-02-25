@@ -1,5 +1,7 @@
 package com.guidewire
 
+uses ratpack.sse.Event
+
 @FunctionalInterface
 interface AdditionalMatchingCriteria {
 
@@ -7,7 +9,10 @@ interface AdditionalMatchingCriteria {
 
 //  var _criteria() : boolean = \ -> false
 
-  function apply( func() : boolean) : boolean //{
+//  function apply(e: Event,  func(Event) : boolean ) : boolean 
+  function apply(e: Event) : boolean 
+  
+  
 //    return func()
 //  }
 

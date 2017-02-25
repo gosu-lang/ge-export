@@ -87,6 +87,10 @@ class BuildScanExportClient {
   }
 
   static function getAllEventsForBuild(publicBuildId : String) : List<Event> {
+    return getAllEventsForBuild(publicBuildId, {})
+  }
+  
+  static function getAllEventsForBuild(publicBuildId : String, criteria : Map<AdditionalMatchingCriteria, Boolean>) : List<Event> {
     var base = new URI(SERVER)
 
     var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
@@ -191,5 +195,44 @@ class BuildScanExportClient {
     return {}
   }
   */
+  
+  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<AdditionalMatchingCriteria>) : List<BuildMetadata> {
+    var status = new HashMap<AdditionalMatchingCriteria, Boolean>()
+    criteria.each(\ it -> status.put(it, false))
+
+    var base = new URI(SERVER)
+
+    var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
+        .path("build-export/v1/build")
+        .segment(buildId, {})
+        .segment("events", {})
+        .params({"stream", ""})
+        .build()
+    
+    var retval = new ArrayList<BuildMetadata>()
+    
+    for(build in builds) {
+      status.eachValue(\value -> false) //reset the map
+      
+      var result = ExecHarness.yieldSingle( \ exec -> {
+        var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
+        var sseClient = ServerSentEventStreamClient.of(httpClient)
+        var buildEventUri = buildUriFunction(build.publicBuildId)
+
+        return sseClient.request(buildEventUri, GZIP)
+            .flatMap( \ events ->
+                new FindFirstPublisher(events, \ e -> e.TypeMatches(eventType) ? e : null)
+                    .toPromise()
+            )
+      })
+      
+      if(status.values().allMatch(\value -> true)) {
+        retval.add(build)
+      }
+    }
+    
+    
+    return retval
+  }
   
 }

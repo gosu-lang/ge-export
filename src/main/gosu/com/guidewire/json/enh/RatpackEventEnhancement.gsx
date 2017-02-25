@@ -12,4 +12,8 @@ enhancement RatpackEventEnhancement: Event {
     return this.Event == eventType.RelativeName
   }
   
+  function as<R>(type: Type<R>) : R {
+    return this.Json as R
+  }
+  
 }
