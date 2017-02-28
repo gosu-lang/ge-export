@@ -4,6 +4,7 @@ uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
 uses com.guidewire.json.BuildMetadata
 uses com.guidewire.json.BuildMetadataUtil
+uses com.guidewire.json.UserTag_1_0
 uses ratpack.exec.ExecResult
 uses ratpack.exec.Promise
 uses ratpack.exec.util.ParallelBatch
@@ -221,7 +222,7 @@ class BuildScanExportClient {
 
         return sseClient.request(buildEventUri, GZIP)
             .flatMap( \ events ->
-                new FindFirstPublisher(events, \ e -> e.TypeMatches(eventType) ? e : null)
+                new FindFirstPublisher(events, \ e : Event -> e.TypeMatches(UserTag_1_0) ? e : null) // TODO eventtype
                     .toPromise()
             )
       })

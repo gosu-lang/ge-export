@@ -36,7 +36,7 @@ class BuildFilterExecutor {
 //      }
 //    }
     
-    _criterion.put( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag, false ) //TODO if equals tag then set Satisfied == true
+    _criterion.put( \ e -> (e as Event).TypeMatches(UserTag_1_0) and (e as Event).as(UserTag_1_0).data.tag == tag, false ) //TODO if equals tag then set Satisfied == true
     return this
   }
 
