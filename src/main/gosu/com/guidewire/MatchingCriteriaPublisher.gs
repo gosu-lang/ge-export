@@ -9,25 +9,20 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
 
   final var _parent : O
   final var _publisher : Publisher<I>
-  final var _finders : List<AdditionalMatchingCriteria<I>>
   final var _match : Match
+  final var _debug : boolean
   
-//  var _result : Object = null
-  
-//  construct(publisher : Publisher<I>, finders : List<block(I) : O>) {
-  construct(publisher : Publisher<I>, finders : List<AdditionalMatchingCriteria<I>>, parent : O) {
-    _parent = parent
+  construct(publisher : Publisher<I>, finders : List<AdditionalMatchingCriteria<I>>, parent : O, debug : boolean = false) {
     _publisher = publisher
-    _finders = finders
-    _match = new Match(_finders)
+    _match = new Match(finders)
+    _parent = parent
+    _debug = debug
   }
   
-//  property get Result() : Object {
-//    return _result
-//  }
-  
   override function subscribe(subscriber: Subscriber) {
-    print("subscribe!")
+    if(_debug) {
+      print("subscribing to ${_parent}")
+    }
     _publisher.subscribe(new Subscriber<I>() {
 
       var upstream : Subscription
@@ -57,10 +52,11 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
         if (upstream == null) {
           return
         }
-        print("onNext") //TODO apply each of the finders, record results
         try {
           for(f in _match.UnmetCriteria) {
-            print("calling ${f} and passing ${i}")
+            if(_debug) {
+              print("calling ${f} and passing ${i}")
+            }
             var result = f.apply(i)
             if(result) {
               _match.match(f)
@@ -77,7 +73,7 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
         if(_match.UnmetCriteria.Empty) {
           upstream.cancel()
           upstream = null
-          subscriber.onNext(_parent) //_result = _parent
+          subscriber.onNext(_parent)
           subscriber.onComplete()
         }
       }
@@ -104,7 +100,6 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
       for(finder in finders) {
         _status.put(finder, false)
       }
-//      finders.each( \ finder -> _status.put(finder, false) )
     }
     
     property get UnmetCriteria() : Set<AdditionalMatchingCriteria> {
@@ -113,10 +108,6 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
    
     function match(func : AdditionalMatchingCriteria) {
       _status.put(func, true)
-    }
-
-    function unmatch(func : AdditionalMatchingCriteria) {
-      _status.put(func, false)
     }
 
   }
