@@ -10,8 +10,8 @@ class MatchingCriteriaPublisherTest {
 
   @Test
   function matchesSingleCriteria() {
-    var f : block(e: String) : boolean = \e -> e == "baz"
-    var functions = {f}
+    var f1 : block(e: String) : boolean = \e -> e == "baz"
+    var functions = {f1}
 
     var buildPublisher = new IterablePublisher( { "foo" } )
     var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
@@ -25,13 +25,13 @@ class MatchingCriteriaPublisherTest {
     Assert.assertEquals("foo", result)
   }
 
-/*  @Test
+  @Test
   function nonMatchingSingleCriteria() {
-    var f : AdditionalMatchingCriteria<String> = \e -> e == "will not match"
-    var functions = {f}
+    var f1 : block(e: String) : boolean = \e -> e == "will not match"
+    var functions = {f1}
 
     var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher = new IterablePublisher( { "bar", "baz" })
+    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
@@ -44,12 +44,12 @@ class MatchingCriteriaPublisherTest {
 
   @Test
   function matchesMultipleCriteria() {
-    var f1 : AdditionalMatchingCriteria<String> = \e -> e == "bar"
-    var f2 : AdditionalMatchingCriteria<String> = \e -> e == "baz"
+    var f1 : block(e: String) : boolean = \e -> e == "bar"
+    var f2 : block(e: String) : boolean = \e -> e == "baz"
     var functions = {f1, f2}
 
     var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher = new IterablePublisher( { "bar", "baz" })
+    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
@@ -62,12 +62,12 @@ class MatchingCriteriaPublisherTest {
 
   @Test
   function matchesSomeButNotAllCriteria() {
-    var f1 : AdditionalMatchingCriteria<String> = \e -> e == "bar"
-    var f2 : AdditionalMatchingCriteria<String> = \e -> e == "will not match"
+    var f1 : block(e: String) : boolean = \e -> e == "bar"
+    var f2 : block(e: String) : boolean = \e -> e == "will not match"
     var functions = {f1, f2}
 
     var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher = new IterablePublisher( { "bar", "baz" })
+    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
@@ -80,11 +80,11 @@ class MatchingCriteriaPublisherTest {
 
   @Test
   function multipleParentsMatchSingleCriteria() {
-    var f : AdditionalMatchingCriteria<String> = \e -> e == "bar"
-    var functions = {f}
+    var f1 : block(e: String) : boolean = \e -> e == "bar"
+    var functions = {f1}
 
     var buildPublisher = new IterablePublisher( { "foo", "42" } ) // both values will be evaluated for the event publisher values
-    var eventPublisher = new IterablePublisher( { "bar", "baz" } )
+    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" } )
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
@@ -97,12 +97,12 @@ class MatchingCriteriaPublisherTest {
 
   @Test
   function matchesSomeParentsButNotOthers() {
-    var f : AdditionalMatchingCriteria<String> = \e -> e == "bar"
-    var functions = {f}
+    var f1 : block(e: String) : boolean = \e -> e == "bar"
+    var functions = {f1}
 
     var buildPublisher = new IterablePublisher( { "foo", "42" } ) // both values will be evaluated for the event publisher values
-    var fooEventPublisher = new IterablePublisher( { "bar", "baz" } )
-    var otherEventPublisher = new IterablePublisher( { "will", "not", "match" } )
+    var fooEventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" } )
+    var otherEventPublisher : Publisher<String> = new IterablePublisher( { "will", "not", "match" } )
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
@@ -113,6 +113,6 @@ class MatchingCriteriaPublisherTest {
     result = result.where( \ it -> it != null) //TODO should we filter nulls, or keep them and check the length of input and output lists?
 
     Assert.assertEquals({"foo"}, result)
-  }*/
+  }
   
 }
