@@ -2,21 +2,12 @@ package com.guidewire
 
 uses ratpack.sse.Event
 
+uses java.lang.*
+
 @FunctionalInterface
-interface AdditionalMatchingCriteria<I> {
+@java.lang.Deprecated
+interface AdditionalMatchingCriteria<I> { //TODO kill and use Predicate instead
 
-//  var _satisfied : boolean as Satisfied = false
-
-//  var _criteria() : boolean = \ -> false
-
-//  function apply(e: Event,  func(Event) : boolean ) : boolean 
   function apply(e: I) : boolean
   
-//    return func()
-//  }
-
-//  construct(func : block() : boolean) {
-//    _criteria = func
-//  }
-
 }

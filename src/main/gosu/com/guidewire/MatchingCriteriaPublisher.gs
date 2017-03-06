@@ -12,7 +12,7 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
   final var _match : Match
   final var _debug : boolean
   
-  construct(publisher : Publisher<I>, finders : List<AdditionalMatchingCriteria<I>>, parent : O, debug : boolean = false) {
+  construct(publisher : Publisher<I>, finders : List<block(e: I) : boolean>, parent : O, debug : boolean = false) {
     _publisher = publisher
     _match = new Match(finders)
     _parent = parent
@@ -57,12 +57,13 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
             if(_debug) {
               print("calling ${f} and passing ${i}")
             }
-            var result = f.apply(i)
+            var result = f(i)
             if(result) {
+              if(_debug) {
+                print("matched!")
+              }              
               _match.match(f)
-              print("matched!")
             }
-            print(result)
           }
         } 
         catch (e : Exception) {
@@ -94,19 +95,19 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
   
   private class Match {
     
-    final var _status : Map<AdditionalMatchingCriteria, Boolean> = new HashMap<AdditionalMatchingCriteria, Boolean>()
+    final var _status : Map<block(e: I) : boolean, Boolean> = {}//new HashMap<block(e: I) : boolean, Boolean>()
     
-    construct(finders : List<AdditionalMatchingCriteria>) {
+    construct(finders : List<block(e: I) : boolean>) {
       for(finder in finders) {
         _status.put(finder, false)
       }
     }
     
-    property get UnmetCriteria() : Set<AdditionalMatchingCriteria> {
+    property get UnmetCriteria() : Set<block(e: I) : boolean> {
       return _status.filterByValues( \ v -> v == false ).Keys
     }
    
-    function match(func : AdditionalMatchingCriteria) {
+    function match(func : block(e: I) : boolean) {
       _status.put(func, true)
     }
 
