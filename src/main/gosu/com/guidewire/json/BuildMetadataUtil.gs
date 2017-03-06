@@ -21,8 +21,14 @@ class BuildMetadataUtil {
     return builds.subList(Math.max(0, ct - n), ct)
   }
 
-  function withTag(tag : String) : List<BuildMetadata> {
-    return {} //fixme  
+  static function excludeBuildIds(buildIds : List<String>, builds : List<BuildMetadata>) {
+    builds.removeWhere( \ build -> buildIds.contains(build.publicBuildId))
   }
-
+  
+  static function dumpEventCounts(builds : List<BuildMetadata>) {
+    for(build in builds.orderByDescending(\ build -> build.eventCount)) {
+      print("${build.publicBuildId} -> ${build.eventCount}")
+    }
+  }
+  
 }

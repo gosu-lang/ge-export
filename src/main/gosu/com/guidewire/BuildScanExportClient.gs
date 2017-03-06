@@ -197,10 +197,8 @@ class BuildScanExportClient {
   }
   */
   
-  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<AdditionalMatchingCriteria>) : List<BuildMetadata> {
-    var status = new HashMap<AdditionalMatchingCriteria, Boolean>()
-    criteria.each(\ it -> status.put(it, false))
-
+//  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<AdditionalMatchingCriteria<Event>>) : List<BuildMetadata> {
+  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<block(e: Event) : boolean>, debug : boolean = false) : List<BuildMetadata> {
     var base = new URI(SERVER)
 
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
@@ -213,25 +211,19 @@ class BuildScanExportClient {
     var retval = new ArrayList<BuildMetadata>()
     
     for(build in builds) {
-      status.eachValue(\value -> false) //reset the map
-      
       var result = ExecHarness.yieldSingle( \ exec -> {
         var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
         var sseClient = ServerSentEventStreamClient.of(httpClient)
         var buildEventUri = buildUriFunction(build.publicBuildId)
 
         return sseClient.request(buildEventUri, GZIP)
-            .flatMap( \ events ->
-                new FindFirstPublisher(events, \ e : Event -> e.TypeMatches(UserTag_1_0) ? e : null) // TODO eventtype
-                    .toPromise()
-            )
-      })
+            .flatMap( \ events -> new MatchingCriteriaPublisher(events as TransformablePublisher<Event>, criteria, build.publicBuildId, debug).toPromise())
+      }).ValueOrThrow
       
-      if(status.values().allMatch(\value -> true)) {
+      if(result != null) {
         retval.add(build)
       }
     }
-    
     
     return retval
   }
