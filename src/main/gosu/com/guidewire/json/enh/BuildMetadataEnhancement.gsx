@@ -4,6 +4,7 @@ uses com.guidewire.json.*
 uses com.guidewire.BuildScanExportClient
 uses ratpack.sse.Event
 
+uses java.net.URL
 uses java.time.Duration
 uses java.time.Instant
 uses java.time.ZoneId
@@ -41,17 +42,25 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
   }
   
   property get JavaCompilationTime() : Duration {
+    return getAbstractTaskDuration("compileJava")
+  }
+
+  property get GosuCompilationTime() : Duration {
+    return getAbstractTaskDuration("compileGosu")
+  }
+  
+  private function getAbstractTaskDuration(suffix: String) : Duration {    
     var events = AllEvents
     
     var startTimes = events
       .whereEventTypeIs(TaskStarted_1_0)
-      .where(\e -> e.data.path.endsWith("compileJava"))
+      .where(\e -> e.data.path.endsWith(suffix))
       .partitionUniquely(\e -> e.data.path)
 
     var endTimes = events
       .whereEventTypeIs(TaskFinished_1_2)
-      .where(\e -> e.data.path.endsWith("compileJava"))
-      .partitionUniquely( \ e -> e.data.path )
+      .where(\e -> e.data.path.endsWith(suffix))
+      .partitionUniquely(\e -> e.data.path)
     
     var cumulativeTime = Duration.ZERO
     
@@ -62,7 +71,7 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
 //      var cumulativeTime = Date.from(Instant.ofEpochMilli(endTs).minus(startTs, Duration))
       var duration = Duration.between(Instant.ofEpochMilli(startTs), Instant.ofEpochMilli(endTs))
       
-      print("Task ${k} started at ${startTs}, ended at ${endTs} and took ${duration} with result ${result}")
+//      print("Task ${k} started at ${startTs}, ended at ${endTs} and took ${duration} with result ${result}")
       
       cumulativeTime = cumulativeTime.plus(duration)
     })
@@ -74,16 +83,8 @@ enhancement BuildMetadataEnhancement: BuildMetadata {
     return BuildScanExportClient.getAllEventsForBuild(this)
   }
   
-//  function getFirstEventOfType<R extends Dynamic>(eventType : Type<R>) : R {
-//    return BuildScanExportClient.getFirstEventForBuild(eventType, this)
-//  }
-//  
-//  function getAllEventsOfType<R extends Dynamic>(eventType : Type<R>) : List<R> {
-//    return BuildScanExportClient.getAllEventsForBuild(eventType, this)
-//  }
-  
-  function hasTag(tag : String) : boolean {
-    return false //fixme
+  property get URL() : URL {
+    return new URL(BuildScanExportClient.SERVER + "/s/" + this.publicBuildId)
   }
   
 }

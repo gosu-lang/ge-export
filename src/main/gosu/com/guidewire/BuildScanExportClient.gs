@@ -88,11 +88,7 @@ class BuildScanExportClient {
   }
 
   static function getAllEventsForBuild(publicBuildId : String) : List<Event> {
-    return getAllEventsForBuild(publicBuildId, {})
-  }
-  
-  static function getAllEventsForBuild(publicBuildId : String, criteria : Map<AdditionalMatchingCriteria, Boolean>) : List<Event> {
-    var base = new URI(SERVER)
+   var base = new URI(SERVER)
 
     var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")
@@ -151,54 +147,7 @@ class BuildScanExportClient {
     }
   }
   
-/*  
-  static function getAllEventsForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : List<R> {
-    return BuildScanExportClient.getAllEventsForBuild(eventType, build.publicBuildId)
-  }
-  
-  //TODO make this work in java first
-  static function getAllEventsForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : List<R> {
-    var base = new URI(SERVER)
-
-    var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
-        .path("build-export/v1/build")
-        .segment(buildId, {})
-        .segment("events", {})
-        .params({"stream", ""})
-        .build()
-
-    var retval = ExecHarness.yieldSingle(\exec -> {
-      var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
-      var sseClient = ServerSentEventStreamClient.of(httpClient)
-
-//      print("\nParsing build " + publicBuildId)
-      var buildEventUri = buildUriFunction(publicBuildId)
-      return sseClient.request(buildEventUri, GZIP)
-          .flatMap( \ eventStream ->
-            new GroupingPublisher(eventStream, PARALLELISM)
-              .bindExec()
-              .flatMap( \ events -> {
-//                var promises : Iterable<Promise<Event>> = com.google.common.collect.Iterables.transform(events, \ event -> {
-                var promises : List<Promise<Event>> = events.map( \ event -> {
-                  print("Processing event ${event.Id}: ${event.Event}")
-                  return Promise.value(event)
-                })
-//                new FindFirstPublisher(events, \ e -> e.)
-//                  .toPromise()
-//                //events.flatMap( \ e -> e.TypeMatches(eventType) ? Promise.async(e) : null)
-                return ParallelBatch.of(promises).yield() //returns Promise<List<Event<>>>
-              }) //returning TP<List<Event>>
-              
-          )
-    }).getValueOrThrow() //todo cast as List<R>?
-        
-        //.where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property   
-    return {}
-  }
-  */
-  
-//  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<AdditionalMatchingCriteria<Event>>) : List<BuildMetadata> {
-  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<block(e: Event) : boolean>, debug : boolean = false) : List<BuildMetadata> {
+  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<block(e: Event) : Boolean>, debug : boolean = false) : List<BuildMetadata> {
     var base = new URI(SERVER)
 
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
@@ -217,7 +166,7 @@ class BuildScanExportClient {
         var buildEventUri = buildUriFunction(build.publicBuildId)
 
         return sseClient.request(buildEventUri, GZIP)
-            .flatMap( \ events -> new MatchingCriteriaPublisher(events as TransformablePublisher<Event>, criteria, build.publicBuildId, debug).toPromise())
+            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as TransformablePublisher<Event>*/, criteria, build.publicBuildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
       }).ValueOrThrow
       
       if(result != null) {

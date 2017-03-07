@@ -12,7 +12,7 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
   final var _match : Match
   final var _debug : boolean
   
-  construct(publisher : Publisher<I>, finders : List<block(e: I) : boolean>, parent : O, debug : boolean = false) {
+  construct(publisher : Publisher<I>, finders : List<block(e: I) : Boolean>, parent : O, debug : boolean = false) {
     _publisher = publisher
     _match = new Match(finders)
     _parent = parent
@@ -63,15 +63,24 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
                 print("matched!")
               }              
               _match.match(f)
+            } else if(result == false) {
+              if(_debug) {
+                print("unmatched!")
+              }
+              // any result of false will cause the publisher to short-circuit and return nothing
+              upstream.cancel()
+              upstream = null
+              subscriber.onComplete()
+              return
             }
           }
-        } 
+        }
         catch (e : Exception) {
           upstream.cancel()
           onError(e)
           return
         }
-        if(_match.UnmetCriteria.Empty) {
+        if(_match.UnmetCriteria.Empty) { //success;
           upstream.cancel()
           upstream = null
           subscriber.onNext(_parent)
@@ -95,19 +104,19 @@ class MatchingCriteriaPublisher<I, O> implements TransformablePublisher<O> {
   
   private class Match {
     
-    final var _status : Map<block(e: I) : boolean, Boolean> = {}//new HashMap<block(e: I) : boolean, Boolean>()
+    final var _status : Map<block(e: I) : Boolean, Boolean> = {}
     
-    construct(finders : List<block(e: I) : boolean>) {
+    construct(finders : List<block(e: I) : Boolean>) {
       for(finder in finders) {
-        _status.put(finder, false)
+        _status.put(finder, null) //null indicates that more Events must be processed to make a determination
       }
     }
     
-    property get UnmetCriteria() : Set<block(e: I) : boolean> {
-      return _status.filterByValues( \ v -> v == false ).Keys
+    property get UnmetCriteria() : Set<block(e: I) : Boolean> {
+      return _status.filterByValues( \ v -> v == null ).Keys
     }
    
-    function match(func : block(e: I) : boolean) {
+    function match(func : block(e: I) : Boolean) {
       _status.put(func, true)
     }
 

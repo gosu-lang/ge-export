@@ -12,7 +12,7 @@ class BuildFilterExecutor {
   var _since = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
   var _until = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
   var _excludes : List<String> = {}
-  var _criterion : List<block(e: Event) : boolean> = {} //TODO use java.util.function.Predicate instead?
+  var _criterion : List<block(e: Event) : Boolean> = {} //TODO use java.util.function.Predicate instead?
   var _debug : boolean
 
   function since(since : ZonedDateTime) : BuildFilterExecutor {
@@ -48,14 +48,25 @@ class BuildFilterExecutor {
 
   function withTags(tags: String[]) : BuildFilterExecutor {
     for(tag in tags) {
-      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag )
-//      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? true : null ) //TODO if equals tag then set Satisfied == true
+      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? true : null )
+    }
+    return this
+  }
+
+  function notTagged(tag: String) : BuildFilterExecutor {
+    notTagged({tag})
+    return this
+  }
+  
+  function notTagged(tags: String[]) : BuildFilterExecutor {
+    for(tag in tags) {
+      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? false : null )
     }
     return this
   }
 
   function withProjectName(name: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(ProjectStructure_1_0) and e.as(ProjectStructure_1_0).data.rootProjectName == name)
+    _criterion.add( \ e -> e.TypeMatches(ProjectStructure_1_0) ? e.as(ProjectStructure_1_0).data.rootProjectName == name : null )
     return this
   }
 
@@ -65,22 +76,22 @@ class BuildFilterExecutor {
    * @return
    */
   function withOsFamily(family: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(Os_1_0) and e.as(Os_1_0).data.family == family)
+    _criterion.add( \ e -> e.TypeMatches(Os_1_0) ? e.as(Os_1_0).data.family == family : null )
     return this
   }
 
   function withUsername(username: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) and e.as(BuildAgent_1_0).data.username == username)
+    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.username == username : null )
     return this
   }
 
   function withHostname(hostname: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) and e.as(BuildAgent_1_0).data.publicHostname == hostname)
+    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.publicHostname == hostname : null )
     return this
   }
 
   function withCustomValue(key: String, value: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(UserNamedValue_1_0) and e.as(UserNamedValue_1_0).data.key == key and e.as(UserNamedValue_1_0).data.value == value)
+    _criterion.add( \ e -> e.TypeMatches(UserNamedValue_1_0) and e.as(UserNamedValue_1_0).data.key == key ? e.as(UserNamedValue_1_0).data.value == value : null )
     return this
   }
 
@@ -88,6 +99,11 @@ class BuildFilterExecutor {
     map.eachKeyAndValue( \ k, v -> withCustomValue(k, v) )
     return this
   }
+  
+//  function withStatus(status: String) : BuildFilterExecutor {
+//    _criterion.add( \ e -> e.TypeMatches(OutputStyledTextEvent_1_0)) ... //TODO implement
+//    return this
+//  }
 
   function withDebugLogging() : BuildFilterExecutor {
     _debug = true
