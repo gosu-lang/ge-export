@@ -32,7 +32,7 @@ class MatchingCriteriaPublisherTest {
     var functions = {f1}
 
     var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
+    var eventPublisher /*: Publisher<String>*/ = new IterablePublisher( { "bar", "baz" })
 
     var result = ExecHarness.yieldSingle( \ exec ->
         buildPublisher
