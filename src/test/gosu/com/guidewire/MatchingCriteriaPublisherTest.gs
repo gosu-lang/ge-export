@@ -27,23 +27,6 @@ class MatchingCriteriaPublisherTest {
   }
 
   @Test
-  function matchesSingleCriteriaNegatively() {
-    var f1 : block(e: String) : Boolean = \e -> e == "kyle" ? false : null // i.e. "not tagged 'kyle'"
-    var functions = {f1}
-
-    var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher /*: Publisher<String>*/ = new IterablePublisher( { "bar", "baz" })
-
-    var result = ExecHarness.yieldSingle( \ exec ->
-        buildPublisher
-            .flatMap( \ build -> new MatchingCriteriaPublisher(eventPublisher, functions, build, true).toPromise() )
-            .toPromise()
-    ).ValueOrThrow
-
-    Assert.assertEquals("foo", result)
-  }
-  
-  @Test
   function nonMatchingSingleCriteria() {
     var f1 : block(e: String) : Boolean = \e -> e == "will not match" ? true : null
     var functions = {f1}
@@ -78,24 +61,6 @@ class MatchingCriteriaPublisherTest {
     Assert.assertEquals("foo", result)
   }
 
-  @Test
-  function matchesMultipleCriteriaWithNegativeMatch() {
-    var f1 : block(e: String) : Boolean = \e -> e == "bar" ? true : null //i.e. tagged 'bar' but not tagged 'baz'
-    var f2 : block(e: String) : Boolean = \e -> e == "baz" ? false : null
-    var functions = {f1, f2}
-
-    var buildPublisher = new IterablePublisher( { "foo" } )
-    var eventPublisher : Publisher<String> = new IterablePublisher( { "bar", "baz" })
-
-    var result = ExecHarness.yieldSingle( \ exec ->
-        buildPublisher
-            .flatMap( \ build -> new MatchingCriteriaPublisher(eventPublisher, functions, build).toPromise() )
-            .toPromise()
-    ).ValueOrThrow
-
-    Assert.assertEquals("foo", result)
-  }  
-  
   @Test
   function matchesSomeButNotAllCriteria() {
     var f1 : block(e: String) : Boolean = \e -> e == "bar" ? true : null
