@@ -16,9 +16,7 @@ dependencies {
   compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
   compile 'io.ratpack:ratpack-core:1.4.2'
   compile 'io.ratpack:ratpack-test:1.4.2'
-  compile 'com.fasterxml.jackson.core:jackson-databind:2.8.2' //TODO delete me
   compile 'junit:junit:4.12'
-  runtime 'org.slf4j:slf4j-simple:1.7.21'
   runtime files("${System.properties.'java.home'}/../lib/tools.jar")
 }
 
@@ -29,8 +27,8 @@ compileGosu {
 //    jvmArgs += ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y'] //debug on linux/OS X
 //  }
 }
+
 compileTestGosu {
   dependsOn tasks.processTestResources
   classpath = files(tasks.getByName('compileTestJava').outputs.files, sourceSets.test.output.resourcesDir, classpath)
 }
-

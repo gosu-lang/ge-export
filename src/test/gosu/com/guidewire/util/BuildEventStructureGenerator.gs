@@ -1,5 +1,6 @@
-package com.guidewire
+package com.guidewire.util
 
+uses com.guidewire.BuildScanExportClient
 uses com.guidewire.json.BuildMetadata
 uses gw.lang.reflect.json.Json
 uses gw.util.Pair

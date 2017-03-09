@@ -12,7 +12,7 @@ class BuildFilterExecutor {
   var _since = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
   var _until = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
   var _excludes : List<String> = {}
-  var _criterion : List<block(e: Event) : Boolean> = {} //TODO use java.util.function.Predicate instead?
+  var _criterion : List<block(e: Event) : Boolean> = {}
   var _debug : boolean
 
   function since(since : ZonedDateTime) : BuildFilterExecutor {

@@ -1,3 +1,4 @@
+uses com.guidewire.BuildScanExportClient
 uses com.guidewire.json.BuildMetadataUtil
 
 var a = BuildScanExportClient.getListOfBuilds()
