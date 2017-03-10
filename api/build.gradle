@@ -1,0 +1,7 @@
+apply plugin: 'org.gosu-lang.gosu' //Error:(2, 0) Plugin 'org.gosu-lang.gosu' is already on the script classpath. Plugins on the script classpath cannot be applied in the plugins {} block. Add  "apply plugin: 'org.gosu-lang.gosu'" to the body of the script to use the plugin.
+
+dependencies {
+    compile "org.gosu-lang.gosu:gosu-core-api:$gosuVersion"
+    compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
+}
+

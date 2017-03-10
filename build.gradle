@@ -2,9 +2,14 @@ plugins {
   id 'org.gosu-lang.gosu' version '0.2.2'
 }
 
-repositories {
-  mavenLocal()
-  mavenCentral()
+allprojects {
+  repositories {
+    mavenLocal()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' } // for Gosu snapshots
+    mavenCentral()
+  }
+
+  //TODO contains-sources in jar
 }
 
 wrapper {
@@ -12,11 +17,14 @@ wrapper {
 }
 
 dependencies {
-  compile "org.gosu-lang.gosu:gosu-core-api:$gosuVersion"
-  compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
+//  compile "org.gosu-lang.gosu:gosu-core-api:$gosuVersion"
+//  compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
+  compile project(':api')
   compile 'io.ratpack:ratpack-core:1.4.2'
   compile 'io.ratpack:ratpack-test:1.4.2'
-  compile 'junit:junit:4.12'
+
+  testCompile 'junit:junit:4.12' //todo scope
+
   runtime files("${System.properties.'java.home'}/../lib/tools.jar")
 }
 
