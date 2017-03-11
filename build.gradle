@@ -4,6 +4,7 @@ plugins {
 
 allprojects {
   apply plugin: 'org.gosu-lang.gosu'
+  apply plugin: 'maven'
 
   repositories {
     mavenLocal()
@@ -12,6 +13,7 @@ allprojects {
   }
 
   jar {
+    excludes ['serverconfig.properties']
     manifest {
       attributes('Contains-Sources': 'gs, gsx, gst')
     }
@@ -23,9 +25,7 @@ wrapper {
 }
 
 dependencies {
-//  compile "org.gosu-lang.gosu:gosu-core-api:$gosuVersion"
-//  compile "org.gosu-lang.gosu:gosu-core:$gosuVersion"
-  compile project(':api')
+  compile project(":$rootProject.name-api")
   compile 'io.ratpack:ratpack-core:1.4.2'
   compile 'io.ratpack:ratpack-test:1.4.2'
 
@@ -33,6 +33,10 @@ dependencies {
 
   runtime 'org.slf4j:slf4j-simple:1.7.21'
   runtime files("${System.properties.'java.home'}/../lib/tools.jar")
+}
+
+processResources {
+
 }
 
 compileGosu {
