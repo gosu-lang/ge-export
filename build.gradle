@@ -1,15 +1,21 @@
 plugins {
-  id 'org.gosu-lang.gosu' version '0.2.2'
+  id 'org.gosu-lang.gosu' version '0.2.2' apply false
 }
 
 allprojects {
+  apply plugin: 'org.gosu-lang.gosu'
+
   repositories {
     mavenLocal()
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' } // for Gosu snapshots
     mavenCentral()
   }
 
-  //TODO contains-sources in jar
+  jar {
+    manifest {
+      attributes('Contains-Sources': 'gs, gsx, gst')
+    }
+  }
 }
 
 wrapper {
@@ -23,8 +29,9 @@ dependencies {
   compile 'io.ratpack:ratpack-core:1.4.2'
   compile 'io.ratpack:ratpack-test:1.4.2'
 
-  testCompile 'junit:junit:4.12' //todo scope
+  testCompile 'junit:junit:4.12'
 
+  runtime 'org.slf4j:slf4j-simple:1.7.21'
   runtime files("${System.properties.'java.home'}/../lib/tools.jar")
 }
 

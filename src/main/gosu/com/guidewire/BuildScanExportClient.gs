@@ -2,7 +2,7 @@ package com.guidewire
 
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
-uses com.guidewire.json.BuildMetadata
+uses com.guidewire.ge.api.BuildMetadata
 uses com.guidewire.json.BuildMetadataUtil
 uses com.guidewire.json.UserTag_1_0
 uses ratpack.exec.ExecResult
@@ -50,6 +50,7 @@ class BuildScanExportClient {
    */
   static function getListOfBuildsBetween(from : ZonedDateTime, to : ZonedDateTime) : List<BuildMetadata> {
     var builds = getListOfBuildsSince(from)
+    //build.first()
     return builds.where( \ e -> e.timestamp <= to.toInstant().toEpochMilli())
   }
   

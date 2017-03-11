@@ -1,8 +1,9 @@
-uses com.guidewire.BuildFilterExecutor
+uses com.guidewire.ge.api.GradleBuildExporter
+
 uses java.time.ZoneOffset
 uses java.time.ZonedDateTime
   
-var builds = new BuildFilterExecutor()
+var builds = GradleBuildExporter.make
   .since(ZonedDateTime.of(2017, 1, 10, 0, 0, 0, 0, ZoneOffset.UTC))
   .excluding("jqjygupj7bq7m") //this nasty build has 562,697 events
   .excluding("onhclvnedbmmc") //this nasty build has 110,159 events
@@ -10,8 +11,6 @@ var builds = new BuildFilterExecutor()
   .excluding({"jqjygupj7bq7m", "onhclvnedbmmc", "xm6hlqqoesfqu"}) //duplicated; inefficient but it works!
   .withTag("pekin")
   .withTags({"pekin"})
-//  .notTagged("pekin")
-//  .notTagged({"pekin"}) //duplicated; inefficient but it works!
   .withHostname("kmoore-linux")
   .withUsername("kmoore")
   .withOsFamily("linux")

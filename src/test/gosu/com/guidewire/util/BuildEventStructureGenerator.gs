@@ -1,7 +1,7 @@
 package com.guidewire.util
 
 uses com.guidewire.BuildScanExportClient
-uses com.guidewire.json.BuildMetadata
+uses com.guidewire.ge.api.BuildMetadata
 uses gw.lang.reflect.json.Json
 uses gw.util.Pair
 uses ratpack.http.HttpUrlBuilder

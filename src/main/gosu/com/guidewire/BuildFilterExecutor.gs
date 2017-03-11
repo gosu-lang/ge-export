@@ -1,5 +1,7 @@
 package com.guidewire
 
+uses com.guidewire.ge.api.BuildMetadata
+uses com.guidewire.ge.api.GradleBuildExporter
 uses com.guidewire.json.*
 uses ratpack.sse.Event
 
@@ -7,7 +9,7 @@ uses java.time.Duration
 uses java.time.ZoneOffset
 uses java.time.ZonedDateTime
 
-class BuildFilterExecutor {
+class BuildFilterExecutor implements GradleBuildExporter {
 
   var _since = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
   var _until = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
@@ -15,12 +17,12 @@ class BuildFilterExecutor {
   var _criterion : List<block(e: Event) : Boolean> = {}
   var _debug : boolean
 
-  function since(since : ZonedDateTime) : BuildFilterExecutor {
+  override function since(since : ZonedDateTime) : BuildFilterExecutor {
     _since = since
     return this
   }
 
-  function between(from : ZonedDateTime, to : ZonedDateTime) : BuildFilterExecutor {
+  override function between(from : ZonedDateTime, to : ZonedDateTime) : BuildFilterExecutor {
     if(to < from) {
       throw new IllegalStateException(String.format("'to' date must be later than 'from' %s-%s", {from, to}))
     }
@@ -29,43 +31,31 @@ class BuildFilterExecutor {
     return this
   }
   
-  function excluding(buildPublicId : String) : BuildFilterExecutor {
+  override function excluding(buildPublicId : String) : BuildFilterExecutor {
     excluding({buildPublicId})
     return this
   }
 
-  function excluding(buildPublicIds : String[]) : BuildFilterExecutor {
+  override function excluding(buildPublicIds : String[]) : BuildFilterExecutor {
     for(buildPublicId in buildPublicIds) {
       _excludes.add(buildPublicId)
     }
     return this
   }
   
-  function withTag(tag: String) : BuildFilterExecutor {
+  override function withTag(tag: String) : BuildFilterExecutor {
     withTags({tag})
     return this
   }
 
-  function withTags(tags: String[]) : BuildFilterExecutor {
+  override function withTags(tags: String[]) : BuildFilterExecutor {
     for(tag in tags) {
       _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? true : null )
     }
     return this
   }
 
-  function notTagged(tag: String) : BuildFilterExecutor {
-    notTagged({tag})
-    return this
-  }
-  
-  function notTagged(tags: String[]) : BuildFilterExecutor {
-    for(tag in tags) {
-      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? false : null )
-    }
-    return this
-  }
-
-  function withProjectName(name: String) : BuildFilterExecutor {
+  override function withProjectName(name: String) : BuildFilterExecutor {
     _criterion.add( \ e -> e.TypeMatches(ProjectStructure_1_0) ? e.as(ProjectStructure_1_0).data.rootProjectName == name : null )
     return this
   }
@@ -75,27 +65,27 @@ class BuildFilterExecutor {
    * @param family TODO known values are "linux"... ?
    * @return
    */
-  function withOsFamily(family: String) : BuildFilterExecutor {
+  override function withOsFamily(family: String) : BuildFilterExecutor {
     _criterion.add( \ e -> e.TypeMatches(Os_1_0) ? e.as(Os_1_0).data.family == family : null )
     return this
   }
 
-  function withUsername(username: String) : BuildFilterExecutor {
+  override function withUsername(username: String) : BuildFilterExecutor {
     _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.username == username : null )
     return this
   }
 
-  function withHostname(hostname: String) : BuildFilterExecutor {
+  override function withHostname(hostname: String) : BuildFilterExecutor {
     _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.publicHostname == hostname : null )
     return this
   }
 
-  function withCustomValue(key: String, value: String) : BuildFilterExecutor {
+  override function withCustomValue(key: String, value: String) : BuildFilterExecutor {
     _criterion.add( \ e -> e.TypeMatches(UserNamedValue_1_0) and e.as(UserNamedValue_1_0).data.key == key ? e.as(UserNamedValue_1_0).data.value == value : null )
     return this
   }
 
-  function withCustomValues(map: Map<String, String>) : BuildFilterExecutor {
+  override function withCustomValues(map: Map<String, String>) : BuildFilterExecutor {
     map.eachKeyAndValue( \ k, v -> withCustomValue(k, v) )
     return this
   }
@@ -105,29 +95,29 @@ class BuildFilterExecutor {
 //    return this
 //  }
 
-  function withDebugLogging() : BuildFilterExecutor {
+  override function withDebugLogging() : BuildFilterExecutor {
     _debug = true
     return this
   }
   
-  function execute() : List<BuildMetadata> {
+  override function execute() : List<BuildMetadata> {
     var startTime = Date.Now
     print(startTime)
     var timeFilteredResults = BuildScanExportClient.getListOfBuildsBetween(_since, _until)
-    BuildMetadataUtil.excludeBuildIds(_excludes, timeFilteredResults)
+    BuildMetadataUtil.excludeBuildIds(_excludes, timeFilteredResults) //TODO relocate?
     //timeFilteredResults.removeWhere( \ build -> _excludes.contains(build.publicBuildId) )
     print("Processing ${timeFilteredResults.Count} builds after temporal and explicit exclusion filters were applied")
-    var numEvents = timeFilteredResults*.eventCount.sum()
-    var numOps = numEvents * _criterion.Count
-    print("${numEvents} events will be checked against ${_criterion.Count} Predicates, for a total of ${numOps} operations")
-    BuildMetadataUtil.dumpEventCounts(timeFilteredResults)
+//    var numEvents = timeFilteredResults*.eventCount.sum()
+//    var numOps = numEvents * _criterion.Count
+//    print("${numEvents} events will be checked against ${_criterion.Count} Predicates, for a total of ${numOps} operations")
+    BuildMetadataUtil.dumpEventCounts(timeFilteredResults) //TODO relocate?
     var criterionFilteredResults = BuildScanExportClient.filterByCriteria(timeFilteredResults, _criterion, _debug)
 
     var endTime = Date.Now
     print(endTime)
     
-    var rate = numOps / Duration.between(startTime.toInstant(), endTime.toInstant()).getSeconds()
-    print("Processed ${rate} operations per second")
+//    var rate = numOps / Duration.between(startTime.toInstant(), endTime.toInstant()).getSeconds()
+//    print("Processed ${rate} operations per second")
     
     return criterionFilteredResults
   }

@@ -1,5 +1,7 @@
 package com.guidewire.json
 
+uses com.guidewire.ge.api.BuildMetadata
+
 uses java.time.Duration
 
 /**
@@ -24,7 +26,7 @@ class BuildMetadataUtil {
   static function excludeBuildIds(buildIds : List<String>, builds : List<BuildMetadata>) {
     builds.removeWhere( \ build -> buildIds.contains(build.publicBuildId))
   }
-  
+//
   static function dumpEventCounts(builds : List<BuildMetadata>) {
     for(build in builds.orderByDescending(\ build -> build.eventCount)) {
       print("${build.publicBuildId} -> ${build.eventCount}")

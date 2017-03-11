@@ -1,4 +1,4 @@
-package com.guidewire.json
+package com.guidewire.ge.api
 
 structure BuildMetadata {
   static function fromJson( jsonText: String ): BuildMetadata {
