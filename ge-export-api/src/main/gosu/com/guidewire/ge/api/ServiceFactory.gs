@@ -13,13 +13,11 @@ class ServiceFactory {
     var interfaceType = BuildMetadataUtil
     var implementingType : IType
     try {
-//      implementingType = TypeSystem.AllTypesInHierarchy*.Interfaces.singleWhere( \ elt -> elt == interfaceType )
-      implementingType = TypeSystem.getByFullName("com.guidewire.ge.impl.BuildMetadataHelper")
-      /*implementingType = TypeSystem.AllTypeNames
+      implementingType = TypeSystem.AllTypeNames
           .where( \ typename -> !typename.toString().endsWith(IClassPath.PLACEHOLDER_FOR_PACKAGE) and typename != interfaceType.Name )
           .map( \ typename -> TypeSystem.getByFullName(typename.toString()) )
           .where( \ type -> type != interfaceType) //exclude the interfaceType
-          .singleWhere( \ type -> interfaceType.isAssignableFrom(type) )*/
+          .singleWhere( \ type -> interfaceType.isAssignableFrom(type) )
     } catch (e : IllegalStateException) { //
       throw new RuntimeException("Expected to find a single implementation of ${interfaceType.DisplayName} with namespace root 'com.guidewire.'", e)
     }
