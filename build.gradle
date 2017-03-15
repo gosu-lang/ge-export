@@ -32,7 +32,7 @@ dependencies {
   testCompile 'junit:junit:4.12'
 
   runtime 'org.slf4j:slf4j-simple:1.7.21'
-  runtime files("${System.properties.'java.home'}/../lib/tools.jar")
+  runtime files("${System.properties['java.home']}/../lib/tools.jar")
 }
 
 processResources {
