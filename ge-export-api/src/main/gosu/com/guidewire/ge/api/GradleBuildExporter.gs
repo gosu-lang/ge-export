@@ -1,15 +1,11 @@
 package com.guidewire.ge.api
 
-uses gw.lang.reflect.ReflectUtil
 uses java.time.ZonedDateTime
 
 interface GradleBuildExporter {
 
-//  var _instance : GradleBuildExporter as readonly INSTANCE
-//  static property get INSTANCE() : GradleBuildExporter = new Object()
-
   static property get make() : GradleBuildExporter {
-    return ReflectUtil.constructGosuClassInstance("com.guidewire.BuildFilterExecutor", {}) as GradleBuildExporter //ServiceFactory.GradleBuildExporter.since(null)
+    return ServiceFactory.GradleBuildExporterImpl
   }
 
   function since(since: ZonedDateTime) : GradleBuildExporter

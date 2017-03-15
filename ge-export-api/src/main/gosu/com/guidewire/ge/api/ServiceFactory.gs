@@ -16,4 +16,9 @@ class ServiceFactory {
     return instance as BuildMetadataUtil
   }
   
+  static property get GradleBuildExporterImpl() : GradleBuildExporter {
+    // don't cache; return a new instance every time
+    return ReflectUtil.constructGosuClassInstance("com.guidewire.BuildFilterExecutor", {}) as GradleBuildExporter
+  }
+  
 }
