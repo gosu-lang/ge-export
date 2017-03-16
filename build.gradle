@@ -35,10 +35,6 @@ dependencies {
   runtime files("${System.properties['java.home']}/../lib/tools.jar")
 }
 
-processResources {
-
-}
-
 compileGosu {
   dependsOn tasks.processResources
   classpath = files(tasks.getByName('compileJava').outputs.files, sourceSets.main.output.resourcesDir, classpath)
@@ -51,3 +47,4 @@ compileTestGosu {
   dependsOn tasks.processTestResources
   classpath = files(tasks.getByName('compileTestJava').outputs.files, sourceSets.test.output.resourcesDir, classpath)
 }
+
