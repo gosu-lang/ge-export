@@ -10,7 +10,7 @@ class ServiceFactory {
   static property get BuildMetadataUtilImpl() : BuildMetadataUtil {
     var instance = _services.get(BuildMetadataUtil)
     if(instance == null) {
-      instance = ReflectUtil.constructGosuClassInstance("com.guidewire.ge.impl.BuildMetadataHelper", {})
+      instance = ReflectUtil.constructGosuClassInstance("com.kylemoore.ge.impl.BuildMetadataHelper", {})
       _services.put(BuildMetadataUtil, instance)
     }
     return instance as BuildMetadataUtil
@@ -18,7 +18,7 @@ class ServiceFactory {
   
   static property get GradleBuildExporterImpl() : GradleBuildExporter {
     // don't cache; return a new instance every time
-    return ReflectUtil.constructGosuClassInstance("com.guidewire.BuildFilterExecutor", {}) as GradleBuildExporter
+    return ReflectUtil.constructGosuClassInstance("com.kylemoore.BuildFilterExecutor", {}) as GradleBuildExporter
   }
   
 }

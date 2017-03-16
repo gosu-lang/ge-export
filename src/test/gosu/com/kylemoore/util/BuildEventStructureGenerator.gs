@@ -27,7 +27,7 @@ class BuildEventStructureGenerator {
           var folderForStructures = Paths.get("src", {"main", "gosu", "com", "guidewire", "json"}).toFile()
           var file = new java.io.File(folderForStructures, typename.concat(".gs"))
 //          print(file.AbsolutePath)
-          file.write("package com.guidewire.json\n\n" + source)
+          file.write("package com.kylemoore.json\n\n" + source)
         } )
   }
 
