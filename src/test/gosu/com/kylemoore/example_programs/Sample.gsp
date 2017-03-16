@@ -9,15 +9,13 @@ var builds = GradleBuildExporter.make
   .excluding("onhclvnedbmmc") //this nasty build has 110,159 events
   .excluding("xm6hlqqoesfqu") //this nasty build has 109,004 events
   .excluding({"jqjygupj7bq7m", "onhclvnedbmmc", "xm6hlqqoesfqu"}) //duplicated; inefficient but it works!
-  .withTag("pekin")
-  .withTags({"pekin"})
+  .withTag("foo")
+  .withTags({"foo"})
   .withHostname("kmoore-linux")
   .withUsername("kmoore")
   .withOsFamily("linux")
-  .withCustomValue("studio-version", "1.1.x")
-  .withCustomValues({"studio-version" -> "1.1.x"})  //duplicated; inefficient but it works!
-//  .withCustomValues({"gosu-version"->"1.13.11",
-//                     "platform-version" -> "9.13.0-alpha-8"}) //uncomment for more precise filtering
+  .withCustomValue("some_value", "1.1.x")
+  .withCustomValues({"some_value"->"1.1.x"})  //duplicated; inefficient but it works!
 //  .withDebugLogging()
   .execute()
 
