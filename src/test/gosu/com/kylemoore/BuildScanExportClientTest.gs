@@ -1,11 +1,13 @@
 package com.kylemoore
 
-uses org.junit.Test
 uses org.junit.Assert
+uses org.junit.Ignore
+uses org.junit.Test
 
 uses java.time.ZoneId
 uses java.time.ZonedDateTime
 
+@Ignore("only makes sense from within Guidewire's firewall")
 class BuildScanExportClientTest {
 
   @Test

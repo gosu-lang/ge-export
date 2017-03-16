@@ -2,6 +2,10 @@ plugins {
   id 'org.gosu-lang.gosu' version '0.2.2' apply false
 }
 
+wrapper {
+  gradleVersion '3.3'
+}
+
 allprojects {
   apply plugin: 'org.gosu-lang.gosu'
   apply plugin: 'maven'
@@ -12,16 +16,85 @@ allprojects {
     mavenCentral()
   }
 
+  compileGosu {
+    dependsOn tasks.processResources
+    classpath = files(tasks.getByName('compileJava').outputs.files, sourceSets.main.output.resourcesDir, classpath)
+//  gosuOptions.forkOptions.with {
+//    jvmArgs += ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y'] //debug on linux/OS X
+//  }
+  }
+
+  compileTestGosu {
+    dependsOn tasks.processTestResources
+    classpath = files(tasks.getByName('compileTestJava').outputs.files, sourceSets.test.output.resourcesDir, classpath)
+  }  
+  
   jar {
     excludes ['serverconfig.properties']
     manifest {
       attributes('Contains-Sources': 'gs, gsx, gst')
     }
   }
-}
 
-wrapper {
-  gradleVersion '3.3'
+  task sourceJar(type: Jar) {
+    classifier = 'sources'
+    description 'generate sources'
+    from sourceSets.main.gosu
+  }
+
+  task gosudocJar(type: Jar) {
+    classifier = 'gosudoc'
+    description 'generate gosudoc'
+    from gosudoc
+  }
+
+  artifacts {
+    archives sourceJar, gosudocJar
+  }
+
+/* from 'maven' plugin */
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
+        }
+
+        pom.project {
+          name project.name
+          packaging 'jar'
+          description project.description
+          url 'http://gosu-lang.github.io/'
+
+          scm {
+            connection 'scm:git:git@github.com:gosu-lang/gosu-lang.git'
+            developerConnection 'scm:git:git@github.com:gosu-lang/gosu-lang.git'
+            url 'git@github.com:gosu-lang/gosu-lang.git'
+          }
+
+          licenses {
+            license {
+              name 'The Apache License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+          }
+
+          developers {
+            developer {
+              name 'The Gosu Team'
+              email 'gosu.lang.team@gmail.com'
+              organization 'Guidewire'
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 dependencies {
@@ -34,17 +107,3 @@ dependencies {
   runtime 'org.slf4j:slf4j-simple:1.7.21'
   runtime files("${System.properties['java.home']}/../lib/tools.jar")
 }
-
-compileGosu {
-  dependsOn tasks.processResources
-  classpath = files(tasks.getByName('compileJava').outputs.files, sourceSets.main.output.resourcesDir, classpath)
-//  gosuOptions.forkOptions.with {
-//    jvmArgs += ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=y'] //debug on linux/OS X
-//  }
-}
-
-compileTestGosu {
-  dependsOn tasks.processTestResources
-  classpath = files(tasks.getByName('compileTestJava').outputs.files, sourceSets.test.output.resourcesDir, classpath)
-}
-
