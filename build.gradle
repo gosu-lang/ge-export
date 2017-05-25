@@ -3,7 +3,7 @@ plugins {
 }
 
 wrapper {
-  gradleVersion '3.3'
+  gradleVersion '3.5'
 }
 
 allprojects {
