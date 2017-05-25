@@ -8,11 +8,11 @@ enhancement RatpackEventEnhancement: Event {
     return gw.lang.reflect.json.Json.fromJson( this.Data )
   }
 
-  function TypeMatches<R>(eventType: Type<R>) : boolean {
+  reified function TypeMatches<R>(eventType: Type<R>) : boolean {
     return this.Event == eventType.RelativeName
   }
   
-  function as<R>(type: Type<R>) : R {
+  reified function as<R>(type: Type<R>) : R {
     return this.Json as R
   }
   

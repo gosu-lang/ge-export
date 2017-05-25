@@ -109,11 +109,11 @@ class BuildScanExportClient {
     }).getValueOrThrow().where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property
   }
 
-  static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : R {
+  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : R {
     return BuildScanExportClient.getFirstEventForBuild(eventType, build.publicBuildId)
   }
   
-  static function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
+  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
     var base = new URI(SERVER)
 
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
