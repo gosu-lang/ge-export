@@ -4,7 +4,7 @@ uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
 uses com.kylemoore.ge.api.Build
 uses com.kylemoore.json.BuildMetadataUtil
-uses com.kylemoore.json.UserTag_1_0
+uses com.kylemoore.json.UserTag
 uses ratpack.exec.ExecResult
 uses ratpack.exec.Promise
 uses ratpack.exec.util.ParallelBatch

@@ -50,13 +50,13 @@ class BuildFilterExecutor implements GradleBuildExporter {
 
   override function withTags(tags: String[]) : BuildFilterExecutor {
     for(tag in tags) {
-      _criterion.add( \ e -> e.TypeMatches(UserTag_1_0) and e.as(UserTag_1_0).data.tag == tag ? true : null )
+      _criterion.add( \ e -> e.TypeMatches(UserTag) and e.as(UserTag).data.tag == tag ? true : null )
     }
     return this
   }
 
   override function withProjectName(name: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(ProjectStructure_1_0) ? e.as(ProjectStructure_1_0).data.rootProjectName == name : null )
+    _criterion.add( \ e -> e.TypeMatches(ProjectStructure) ? e.as(ProjectStructure).data.rootProjectName == name : null )
     return this
   }
 
@@ -66,22 +66,22 @@ class BuildFilterExecutor implements GradleBuildExporter {
    * @return
    */
   override function withOsFamily(family: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(Os_1_0) ? e.as(Os_1_0).data.family == family : null )
+    _criterion.add( \ e -> e.TypeMatches(Os) ? e.as(Os).data.family == family : null )
     return this
   }
 
   override function withUsername(username: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.username == username : null )
+    _criterion.add( \ e -> e.TypeMatches(BuildAgent) ? e.as(BuildAgent).data.username == username : null )
     return this
   }
 
   override function withHostname(hostname: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(BuildAgent_1_0) ? e.as(BuildAgent_1_0).data.publicHostname == hostname : null )
+    _criterion.add( \ e -> e.TypeMatches(BuildAgent) ? e.as(BuildAgent).data.publicHostname == hostname : null )
     return this
   }
 
   override function withCustomValue(key: String, value: String) : BuildFilterExecutor {
-    _criterion.add( \ e -> e.TypeMatches(UserNamedValue_1_0) and e.as(UserNamedValue_1_0).data.key == key ? e.as(UserNamedValue_1_0).data.value == value : null )
+    _criterion.add( \ e -> e.TypeMatches(UserNamedValue) and e.as(UserNamedValue).data.key == key ? e.as(UserNamedValue).data.value == value : null )
     return this
   }
 
@@ -91,12 +91,12 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
 
   override function withRequestedTask(task: String) : BuildFilterExecutor {
-    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks_1_0) and e.as(BuildRequestedTasks_1_0).data.requested.contains(task) )
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.contains(task) : null)
     return this
   }
 
   override function withRequestedTasks(tasks: String[]) : BuildFilterExecutor {
-    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks_1_0) and e.as(BuildRequestedTasks_1_0).data.requested.containsAll(tasks.toList()) )
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.containsAll(tasks.toList()) : null)
     return this
   }
 

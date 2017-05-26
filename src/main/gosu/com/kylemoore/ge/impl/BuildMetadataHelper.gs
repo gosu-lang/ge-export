@@ -3,10 +3,10 @@ package com.kylemoore.ge.impl
 uses com.kylemoore.BuildScanExportClient
 uses com.kylemoore.ge.api.Build
 uses com.kylemoore.ge.api.BuildMetadataUtil
-uses com.kylemoore.json.BuildFinished_1_0
-uses com.kylemoore.json.BuildStarted_1_0
-uses com.kylemoore.json.TaskFinished_1_3
-uses com.kylemoore.json.TaskStarted_1_2
+uses com.kylemoore.json.BuildFinished
+uses com.kylemoore.json.BuildStarted
+uses com.kylemoore.json.TaskFinished
+uses com.kylemoore.json.TaskStarted
 
 uses java.net.URL
 uses java.time.Duration
@@ -26,13 +26,13 @@ class BuildMetadataHelper implements BuildMetadataUtil {
     var endTime : Long
 
     startTime = events
-        .whereEventTypeIs(BuildStarted_1_0)
+        .whereEventTypeIs(BuildStarted)
         .single()
         .timestamp
 
     try {
       endTime = events
-          .whereEventTypeIs(BuildFinished_1_0)
+          .whereEventTypeIs(BuildFinished)
           .single()
           .timestamp
     } catch(e : IllegalStateException) {
@@ -58,12 +58,12 @@ class BuildMetadataHelper implements BuildMetadataUtil {
     var events = BuildScanExportClient.getAllEventsForBuild(build)
 
     var startTimes = events
-        .whereEventTypeIs(TaskStarted_1_2)
+        .whereEventTypeIs(TaskStarted)
         .where(\e -> e.data.path.endsWith(suffix))
         .partitionUniquely(\e -> e.data.path)
 
     var endTimes = events
-        .whereEventTypeIs(TaskFinished_1_3)
+        .whereEventTypeIs(TaskFinished)
         .where(\e -> e.data.path.endsWith(suffix))
         .partitionUniquely(\e -> e.data.path)
 
