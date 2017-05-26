@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure Jvm_1_0 {
-  static function fromJson(jsonText: String): Jvm_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Jvm_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: Jvm
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure Jvm {
+  static function fromJson(jsonText: String): Jvm {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Jvm
   }
-  static function fromJsonUrl(url: String): Jvm_1_0 {
+  static function fromJsonUrl(url: String): Jvm {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): Jvm_1_0 {
+  static function fromJsonUrl(url: java.net.URL): Jvm {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : Jvm_1_0 {
+  static function fromJsonFile(file: java.io.File) : Jvm {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

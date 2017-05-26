@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure OutputStyledTextEvent_1_0 {
-  static function fromJson(jsonText: String): OutputStyledTextEvent_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as OutputStyledTextEvent_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: OutputStyledTextEvent
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure OutputStyledTextEvent {
+  static function fromJson(jsonText: String): OutputStyledTextEvent {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as OutputStyledTextEvent
   }
-  static function fromJsonUrl(url: String): OutputStyledTextEvent_1_0 {
+  static function fromJsonUrl(url: String): OutputStyledTextEvent {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): OutputStyledTextEvent_1_0 {
+  static function fromJsonUrl(url: java.net.URL): OutputStyledTextEvent {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : OutputStyledTextEvent_1_0 {
+  static function fromJsonFile(file: java.io.File) : OutputStyledTextEvent {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

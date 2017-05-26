@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure ConfigurationResolutionData_1_0 {
-  static function fromJson(jsonText: String): ConfigurationResolutionData_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as ConfigurationResolutionData_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: ConfigurationResolutionData
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure ConfigurationResolutionData {
+  static function fromJson(jsonText: String): ConfigurationResolutionData {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as ConfigurationResolutionData
   }
-  static function fromJsonUrl(url: String): ConfigurationResolutionData_1_0 {
+  static function fromJsonUrl(url: String): ConfigurationResolutionData {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): ConfigurationResolutionData_1_0 {
+  static function fromJsonUrl(url: java.net.URL): ConfigurationResolutionData {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : ConfigurationResolutionData_1_0 {
+  static function fromJsonFile(file: java.io.File) : ConfigurationResolutionData {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

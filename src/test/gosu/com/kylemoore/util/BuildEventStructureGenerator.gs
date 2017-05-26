@@ -21,17 +21,20 @@ class BuildEventStructureGenerator {
   static function main(args : String[]) {
     var yesterday = ZonedDateTime.of(2017, 5, 24, 0, 0, 0, 0, ZoneOffset.UTC)
     var listOfBuilds = BuildScanExportClient.getListOfBuildsSince(yesterday)
+    var pluginVersion = listOfBuilds.last().pluginVersion
     var structures = generateStructuresForAllEventTypes(listOfBuilds.last())
 
     structures
         .where( \ event -> event.type.eventType != "ConfigurationResolutionData_1_0") //skipping for now
         .each(\event -> {
-          var typename = "${event.type.eventType}_${event.type.majorVersion}_${event.type.minorVersion}"
-          var source = Json.makeStructureTypes(typename, event as javax.script.Bindings, false)// fromJson(event.Second).toStructure(typename)
+          var typename = event.type.eventType
+          var packageDeclaration = "package com.kylemoore.json\n\n"
+          var header = StructureHeader.renderToString(typename, event.type.majorVersion, event.type.minorVersion, pluginVersion)
+          var source = Json.makeStructureTypes(typename, event as javax.script.Bindings, false) // fromJson(event.Second).toStructure(typename)
           var folderForStructures = Paths.get("src", {"main", "gosu", "com", "guidewire", "json"}).toFile()
           var file = new java.io.File(folderForStructures, typename.concat(".gs"))
 //          print(file.AbsolutePath)
-          file.write("package com.kylemoore.json\n\n" + source)
+          file.write(packageDeclaration + header + source)
         })
   }
 

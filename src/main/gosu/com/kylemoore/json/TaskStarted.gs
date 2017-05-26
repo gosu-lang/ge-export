@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure TaskStarted_1_2 {
-  static function fromJson(jsonText: String): TaskStarted_1_2 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskStarted_1_2
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: TaskStarted
+ * majorVersion: 1
+ * minorVersion: 2
+ *
+ */
+structure TaskStarted {
+  static function fromJson(jsonText: String): TaskStarted {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskStarted
   }
-  static function fromJsonUrl(url: String): TaskStarted_1_2 {
+  static function fromJsonUrl(url: String): TaskStarted {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): TaskStarted_1_2 {
+  static function fromJsonUrl(url: java.net.URL): TaskStarted {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : TaskStarted_1_2 {
+  static function fromJsonFile(file: java.io.File) : TaskStarted {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

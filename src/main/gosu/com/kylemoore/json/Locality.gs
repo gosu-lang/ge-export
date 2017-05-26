@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure Locality_1_0 {
-  static function fromJson(jsonText: String): Locality_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Locality_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: Locality
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure Locality {
+  static function fromJson(jsonText: String): Locality {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Locality
   }
-  static function fromJsonUrl(url: String): Locality_1_0 {
+  static function fromJsonUrl(url: String): Locality {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): Locality_1_0 {
+  static function fromJsonUrl(url: java.net.URL): Locality {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : Locality_1_0 {
+  static function fromJsonFile(file: java.io.File) : Locality {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

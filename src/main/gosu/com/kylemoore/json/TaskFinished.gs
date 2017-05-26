@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure TaskFinished_1_3 {
-  static function fromJson(jsonText: String): TaskFinished_1_3 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskFinished_1_3
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: TaskFinished
+ * majorVersion: 1
+ * minorVersion: 3
+ *
+ */
+structure TaskFinished {
+  static function fromJson(jsonText: String): TaskFinished {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskFinished
   }
-  static function fromJsonUrl(url: String): TaskFinished_1_3 {
+  static function fromJsonUrl(url: String): TaskFinished {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): TaskFinished_1_3 {
+  static function fromJsonUrl(url: java.net.URL): TaskFinished {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : TaskFinished_1_3 {
+  static function fromJsonFile(file: java.io.File) : TaskFinished {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

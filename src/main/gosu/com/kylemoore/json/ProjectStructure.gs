@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure ProjectStructure_1_0 {
-  static function fromJson(jsonText: String): ProjectStructure_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as ProjectStructure_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: ProjectStructure
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure ProjectStructure {
+  static function fromJson(jsonText: String): ProjectStructure {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as ProjectStructure
   }
-  static function fromJsonUrl(url: String): ProjectStructure_1_0 {
+  static function fromJsonUrl(url: String): ProjectStructure {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): ProjectStructure_1_0 {
+  static function fromJsonUrl(url: java.net.URL): ProjectStructure {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : ProjectStructure_1_0 {
+  static function fromJsonFile(file: java.io.File) : ProjectStructure {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

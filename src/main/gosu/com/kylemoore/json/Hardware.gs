@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure Hardware_1_0 {
-  static function fromJson(jsonText: String): Hardware_1_0 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Hardware_1_0
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: Hardware
+ * majorVersion: 1
+ * minorVersion: 0
+ *
+ */
+structure Hardware {
+  static function fromJson(jsonText: String): Hardware {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as Hardware
   }
-  static function fromJsonUrl(url: String): Hardware_1_0 {
+  static function fromJsonUrl(url: String): Hardware {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): Hardware_1_0 {
+  static function fromJsonUrl(url: java.net.URL): Hardware {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : Hardware_1_0 {
+  static function fromJsonFile(file: java.io.File) : Hardware {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data

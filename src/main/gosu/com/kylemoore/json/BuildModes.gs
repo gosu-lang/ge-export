@@ -1,16 +1,23 @@
 package com.kylemoore.json
 
-structure BuildModes_1_1 {
-  static function fromJson(jsonText: String): BuildModes_1_1 {
-    return gw.lang.reflect.json.Json.fromJson( jsonText ) as BuildModes_1_1
+/**
+ * Generated from build-scan plugin 1.7.3
+ * name: BuildModes
+ * majorVersion: 1
+ * minorVersion: 1
+ *
+ */
+structure BuildModes {
+  static function fromJson(jsonText: String): BuildModes {
+    return gw.lang.reflect.json.Json.fromJson( jsonText ) as BuildModes
   }
-  static function fromJsonUrl(url: String): BuildModes_1_1 {
+  static function fromJsonUrl(url: String): BuildModes {
     return new java.net.URL( url ).JsonContent
   }
-  static function fromJsonUrl(url: java.net.URL): BuildModes_1_1 {
+  static function fromJsonUrl(url: java.net.URL): BuildModes {
     return url.JsonContent
   }
-  static function fromJsonFile(file: java.io.File) : BuildModes_1_1 {
+  static function fromJsonFile(file: java.io.File) : BuildModes {
     return fromJsonUrl( file.toURI().toURL() )
   }
   property get data(): data
