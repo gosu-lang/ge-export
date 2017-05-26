@@ -2,7 +2,7 @@ package com.kylemoore
 
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
-uses com.kylemoore.ge.api.BuildMetadata
+uses com.kylemoore.ge.api.Build
 uses com.kylemoore.json.BuildMetadataUtil
 uses com.kylemoore.json.UserTag_1_0
 uses ratpack.exec.ExecResult
@@ -28,11 +28,11 @@ class BuildScanExportClient {
 
   static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
-  static function getBuildById(buildId : String) : BuildMetadata {
-    return getFirstEventForBuild(BuildMetadata, buildId)
+  static function getBuildById(buildId : String) : Build {
+    return getFirstEventForBuild(Build, buildId)
   }
 
-  static function getMostRecentBuilds(n : int) : List<BuildMetadata> {
+  static function getMostRecentBuilds(n : int) : List<Build> {
     return BuildMetadataUtil.getMostRecent(n, getListOfBuilds())
   }
   
@@ -40,7 +40,7 @@ class BuildScanExportClient {
    * Gets all BuildMetadata events from beginning of time, defined as 2016-12-15 00:00 UTC
    * @return List of Events; all Data properties are assignable to BuildMetadata
    */
-  static function getListOfBuilds() : List<BuildMetadata> {
+  static function getListOfBuilds() : List<Build> {
     return getListOfBuildsSince(ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC))
   }
 
@@ -48,7 +48,7 @@ class BuildScanExportClient {
    * Gets all BuildMetadata events between the provided dates (inclusive)
    * @return List of Events; all Data properties are assignable to BuildMetadata
    */
-  static function getListOfBuildsBetween(from : ZonedDateTime, to : ZonedDateTime) : List<BuildMetadata> {
+  static function getListOfBuildsBetween(from : ZonedDateTime, to : ZonedDateTime) : List<Build> {
     var builds = getListOfBuildsSince(from)
     //build.first()
     return builds.where( \ e -> e.timestamp <= to.toInstant().toEpochMilli())
@@ -56,9 +56,9 @@ class BuildScanExportClient {
   
   /**
    * Gets all BuildMetadata events since the provided date
-   * @return List of Events; all Data properties are assignable to BuildMetadata
+   * @return List of Events; all Data properties are assignable to Build
    */
-  static function getListOfBuildsSince(date : ZonedDateTime) : List<BuildMetadata> {
+  static function getListOfBuildsSince(date : ZonedDateTime) : List<Build> {
     var base = new URI(SERVER)
     
     var retval = ExecHarness.yieldSingle(\ exec -> {
@@ -71,7 +71,7 @@ class BuildScanExportClient {
       var listingUri = HttpUrlBuilder.base(base)
           .path("build-export/v1/builds/since")
           .segment(timestampString, {})
-          .params({"stream", ""})
+//          .params({"stream", ""}) //TODO this seems to cause the connection to hang in GE 2017.3
           .build()
       
       return sseClient.request(listingUri, GZIP)
@@ -81,11 +81,11 @@ class BuildScanExportClient {
                   .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
     
-    return retval.getValueOrThrow()?.whereEventTypeIs(BuildMetadata)
+    return retval.getValueOrThrow()?.whereEventTypeIs(Build) //TODO remove filter?
   }
   
-  static function getAllEventsForBuild(build : BuildMetadata) : List<Event> {
-    return getAllEventsForBuild(build.publicBuildId)
+  static function getAllEventsForBuild(build : Build) : List<Event> {
+    return getAllEventsForBuild(build.buildId)
   }
 
   static function getAllEventsForBuild(publicBuildId : String) : List<Event> {
@@ -102,15 +102,15 @@ class BuildScanExportClient {
       var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
       var sseClient = ServerSentEventStreamClient.of(httpClient)
 
-//      print("\nParsing build " + publicBuildId)
+//      print("\nParsing build " + buildId)
       var buildEventUri = buildUriFunction(publicBuildId)
       return sseClient.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
-    }).getValueOrThrow().where(\e -> e.Id != publicBuildId) //filter out the BuildMetadata event, easily recognizable by its Id property
+    }).getValueOrThrow().where(\e -> e.Id != publicBuildId) //filter out the Build event, easily recognizable by its Id property
   }
 
-  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : BuildMetadata) : R {
-    return BuildScanExportClient.getFirstEventForBuild(eventType, build.publicBuildId)
+  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : Build) : R {
+    return BuildScanExportClient.getFirstEventForBuild(eventType, build.buildId)
   }
   
   static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
@@ -125,7 +125,7 @@ class BuildScanExportClient {
     
     //var eventForSubtype: block(event : Object): Event = \ e -> (e as Event).Event == eventType.RelativeName ? (e as Event) : null
 
-//    print("\nParsing build " + publicBuildId + ", looking for first " + R.RelativeName) //TODO debug logging?
+    print("\nParsing build " + publicBuildId + ", looking for first " + R.RelativeName) //TODO debug logging?
 
     var result = ExecHarness.yieldSingle( \ exec -> {
       var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
@@ -148,7 +148,7 @@ class BuildScanExportClient {
     }
   }
   
-  static function filterByCriteria(builds : List<BuildMetadata>, criteria : List<block(e: Event) : Boolean>, debug : boolean = false) : List<BuildMetadata> {
+  static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, debug : boolean = false) : List<Build> {
     var base = new URI(SERVER)
 
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
@@ -158,16 +158,16 @@ class BuildScanExportClient {
         .params({"stream", ""})
         .build()
     
-    var retval = new ArrayList<BuildMetadata>()
+    var retval = new ArrayList<Build>()
     
     for(build in builds) {
       var result = ExecHarness.yieldSingle( \ exec -> {
         var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
         var sseClient = ServerSentEventStreamClient.of(httpClient)
-        var buildEventUri = buildUriFunction(build.publicBuildId)
+        var buildEventUri = buildUriFunction(build.buildId)
 
         return sseClient.request(buildEventUri, GZIP)
-            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as TransformablePublisher<Event>*/, criteria, build.publicBuildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
+            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as TransformablePublisher<Event>*/, criteria, build.buildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
       }).ValueOrThrow
       
       if(result != null) {

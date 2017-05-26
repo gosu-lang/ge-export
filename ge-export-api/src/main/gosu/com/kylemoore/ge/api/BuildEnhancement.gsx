@@ -4,7 +4,7 @@ uses java.net.URL
 uses java.time.Duration
 uses java.time.ZonedDateTime
 
-enhancement BuildMetadataEnhancement: BuildMetadata {
+enhancement BuildEnhancement: Build {
 
   property get UploadedTime() : ZonedDateTime {
     return ServiceFactory.BuildMetadataUtilImpl.UploadedTime(this)

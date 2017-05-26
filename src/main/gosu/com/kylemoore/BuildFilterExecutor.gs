@@ -1,6 +1,6 @@
 package com.kylemoore
 
-uses com.kylemoore.ge.api.BuildMetadata
+uses com.kylemoore.ge.api.Build
 uses com.kylemoore.ge.api.GradleBuildExporter
 uses com.kylemoore.json.*
 uses ratpack.sse.Event
@@ -31,14 +31,14 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
   
-  override function excluding(buildPublicId : String) : BuildFilterExecutor {
-    excluding({buildPublicId})
+  override function excluding(buildId : String) : BuildFilterExecutor {
+    excluding({buildId})
     return this
   }
 
-  override function excluding(buildPublicIds : String[]) : BuildFilterExecutor {
-    for(buildPublicId in buildPublicIds) {
-      _excludes.add(buildPublicId)
+  override function excluding(buildIds : String[]) : BuildFilterExecutor {
+    for(buildId in buildIds) {
+      _excludes.add(buildId)
     }
     return this
   }
@@ -89,7 +89,17 @@ class BuildFilterExecutor implements GradleBuildExporter {
     map.eachKeyAndValue( \ k, v -> withCustomValue(k, v) )
     return this
   }
-  
+
+  override function withRequestedTask(task: String) : BuildFilterExecutor {
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks_1_0) and e.as(BuildRequestedTasks_1_0).data.requested.contains(task) )
+    return this
+  }
+
+  override function withRequestedTasks(tasks: String[]) : BuildFilterExecutor {
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks_1_0) and e.as(BuildRequestedTasks_1_0).data.requested.containsAll(tasks.toList()) )
+    return this
+  }
+
 //  function withStatus(status: String) : BuildFilterExecutor {
 //    _criterion.add( \ e -> e.TypeMatches(OutputStyledTextEvent_1_0)) ... //TODO implement
 //    return this
@@ -100,17 +110,20 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
   
-  override function execute() : List<BuildMetadata> {
+  override function execute() : List<Build> {
     var startTime = Date.Now
     print(startTime)
     var timeFilteredResults = BuildScanExportClient.getListOfBuildsBetween(_since, _until)
+    if(_debug) {
+      print("Got ${timeFilteredResults.size()} timeFilteredResults")
+    }
     BuildMetadataUtil.excludeBuildIds(_excludes, timeFilteredResults) //TODO relocate?
-    //timeFilteredResults.removeWhere( \ build -> _excludes.contains(build.publicBuildId) )
+    //timeFilteredResults.removeWhere( \ build -> _excludes.contains(build.buildId) )
     print("Processing ${timeFilteredResults.Count} builds after temporal and explicit exclusion filters were applied")
 //    var numEvents = timeFilteredResults*.eventCount.sum()
 //    var numOps = numEvents * _criterion.Count
 //    print("${numEvents} events will be checked against ${_criterion.Count} Predicates, for a total of ${numOps} operations")
-    BuildMetadataUtil.dumpEventCounts(timeFilteredResults) //TODO relocate?
+//    BuildMetadataUtil.dumpEventCounts(timeFilteredResults) //TODO eventCount was removed?
     var criterionFilteredResults = BuildScanExportClient.filterByCriteria(timeFilteredResults, _criterion, _debug)
 
     var endTime = Date.Now

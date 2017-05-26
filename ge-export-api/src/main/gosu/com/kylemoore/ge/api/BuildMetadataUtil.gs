@@ -7,13 +7,13 @@ uses java.time.ZonedDateTime
 
 interface BuildMetadataUtil {
 
-  function UploadedTime(build: BuildMetadata) : ZonedDateTime
+  function UploadedTime(build: Build) : ZonedDateTime
 
-  function TotalBuildTime(build: BuildMetadata) : Duration
+  function TotalBuildTime(build: Build) : Duration
 
-  function JavaCompilationTime(build: BuildMetadata) : Duration
+  function JavaCompilationTime(build: Build) : Duration
 
-  function GosuCompilationTime(build: BuildMetadata) : Duration
+  function GosuCompilationTime(build: Build) : Duration
 
-  function URL(build: BuildMetadata) : URL
+  function URL(build: Build) : URL
 }

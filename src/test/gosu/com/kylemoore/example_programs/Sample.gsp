@@ -22,4 +22,4 @@ var builds = GradleBuildExporter.make
 print("Found ${builds.Count} builds")
 assert builds.Count == 4 : "Should have been 4"
 
-builds.each(\build -> print("Build ${build.publicBuildId} compiled Java in ${build.JavaCompilationTime}, Gosu in ${build.GosuCompilationTime}. Link -> ${build.URL}"))
+builds.each(\build -> print("Build ${build.buildId} compiled Java in ${build.JavaCompilationTime}, Gosu in ${build.GosuCompilationTime}. Link -> ${build.URL}"))

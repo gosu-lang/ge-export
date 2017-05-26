@@ -32,7 +32,11 @@ interface GradleBuildExporter {
 
   function withCustomValues(map: Map<String, String>) : GradleBuildExporter
 
+  function withRequestedTask(task: String) : GradleBuildExporter
+
+  function withRequestedTasks(tasks: String[]) : GradleBuildExporter
+
   function withDebugLogging() : GradleBuildExporter
 
-  function execute() : List<BuildMetadata>
+  function execute() : List<Build>
 }
