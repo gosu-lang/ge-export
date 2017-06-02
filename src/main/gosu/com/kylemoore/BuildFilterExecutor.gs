@@ -95,8 +95,13 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
 
-  override function withRequestedTasks(tasks: String[]) : BuildFilterExecutor {
-    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.containsAll(tasks.toList()) : null)
+  override function withExactRequestedTasks(tasks: String[]) : BuildFilterExecutor {
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.disjunction(tasks.toList()).Empty : null)
+    return this
+  }
+
+  override function withAnyRequestedTasks(tasks: String[]) : BuildFilterExecutor {
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.intersect(tasks.toList()).HasElements : null)
     return this
   }
 
