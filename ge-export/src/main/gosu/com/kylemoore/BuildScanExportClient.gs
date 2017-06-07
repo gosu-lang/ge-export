@@ -15,7 +15,6 @@ uses ratpack.http.client.HttpClient
 uses ratpack.http.client.RequestSpec
 uses ratpack.sse.Event
 uses ratpack.sse.ServerSentEventStreamClient
-uses ratpack.stream.TransformablePublisher
 uses ratpack.test.exec.ExecHarness
 
 uses java.net.URI
@@ -225,7 +224,7 @@ class BuildScanExportClient {
         var buildEventUri = buildUriFunction(build.buildId)
 
         return SSE_CLIENT.request(buildEventUri, GZIP)
-            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as TransformablePublisher<Event>*/, criteria, build.buildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
+            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as ratpack.stream.TransformablePublisher<Event>*/, criteria, build.buildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
       }).ValueOrThrow
       
       if(result != null) {
