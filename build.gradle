@@ -6,7 +6,7 @@ wrapper {
   gradleVersion '3.5'
 }
 
-allprojects {
+subprojects {
   apply plugin: 'org.gosu-lang.gosu'
   apply plugin: 'maven'
 
@@ -95,15 +95,4 @@ allprojects {
       }
     }
   }
-}
-
-dependencies {
-  compile project(":$rootProject.name-api")
-  compile 'io.ratpack:ratpack-core:1.4.2'
-  compile 'io.ratpack:ratpack-test:1.4.2'
-
-  testCompile 'junit:junit:4.12'
-
-  runtime 'org.slf4j:slf4j-simple:1.7.21'
-  runtime files("${System.properties['java.home']}/../lib/tools.jar")
 }

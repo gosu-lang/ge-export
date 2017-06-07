@@ -1,3 +1,4 @@
-rootProject.name = 'ge-export'
+rootProject.name = 'ge-export-parent'
 
-include "$rootProject.name-api"
+include 'ge-export'
+include 'ge-export-api'
