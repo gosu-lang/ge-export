@@ -12,6 +12,8 @@ interface GradleBuildExporter {
 
   function between(from : ZonedDateTime, to : ZonedDateTime) : GradleBuildExporter
 
+  function sinceBuild(buildId: String) : GradleBuildExporter
+
   function excluding(buildPublicId : String) : GradleBuildExporter
 
   function excluding(buildPublicIds : String[]) : GradleBuildExporter

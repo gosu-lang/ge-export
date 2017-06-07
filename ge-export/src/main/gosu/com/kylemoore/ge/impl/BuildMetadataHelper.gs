@@ -21,7 +21,7 @@ class BuildMetadataHelper implements BuildMetadataUtil {
   }
 
   override function TotalBuildTime(build: Build) : Duration {
-    var events = BuildScanExportClient.getAllEventsForBuild(build)
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {BuildStarted.RelativeName, BuildFinished.RelativeName})
     var startTime : Long
     var endTime : Long
 
@@ -55,7 +55,7 @@ class BuildMetadataHelper implements BuildMetadataUtil {
   }
 
   private function getAbstractTaskDuration(build: Build, suffix: String) : Duration {
-    var events = BuildScanExportClient.getAllEventsForBuild(build)
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {TaskStarted.RelativeName, TaskFinished.RelativeName})
 
     var startTimes = events
         .whereEventTypeIs(TaskStarted)

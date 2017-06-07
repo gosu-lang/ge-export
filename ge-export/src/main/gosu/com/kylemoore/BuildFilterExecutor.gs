@@ -11,10 +11,15 @@ uses java.time.ZonedDateTime
 
 class BuildFilterExecutor implements GradleBuildExporter {
 
-  var _since = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
-  var _until = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
+  private static var START_OF_TIME = ZonedDateTime.of(2016, 12, 15, 0, 0, 0, 0, ZoneOffset.UTC)
+  private static var END_OF_TIME = ZonedDateTime.of(3000, 12, 31, 0, 0, 0, 0, ZoneOffset.UTC)
+  
+  var _since : ZonedDateTime
+  var _until : ZonedDateTime = END_OF_TIME
+  var _sinceBuild : String
   var _excludes : List<String> = {}
   var _criterion : List<block(e: Event) : Boolean> = {}
+  var _eventTypes : Set<String> = {}
   var _debug : boolean
 
   override function since(since : ZonedDateTime) : BuildFilterExecutor {
@@ -28,6 +33,11 @@ class BuildFilterExecutor implements GradleBuildExporter {
     }
     _since = from
     _until = to
+    return this
+  }
+
+  override function sinceBuild(buildId : String) : BuildFilterExecutor {
+    _sinceBuild = buildId
     return this
   }
   
@@ -101,6 +111,7 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
 
   override function withAnyRequestedTasks(tasks: String[]) : BuildFilterExecutor {
+    _eventTypes.add(BuildRequestedTasks.RelativeName)
     _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.intersect(tasks.toList()).HasElements : null)
     return this
   }
@@ -116,9 +127,21 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
   
   override function execute() : List<Build> {
+    if(_since == null and _sinceBuild == null) {
+      throw new IllegalStateException("Must set a starting point using one of: .since(), .between() or .sinceBuild()")
+    }
+    if(_since != null and _sinceBuild != null) {
+      throw new IllegalStateException("Cannot use .since() or .between() in combination with .sinceBuild()")
+    }
+
     var startTime = Date.Now
     print(startTime)
-    var timeFilteredResults = BuildScanExportClient.getListOfBuildsBetween(_since, _until)
+    var timeFilteredResults : List<Build>
+    if(_since != null) {
+      timeFilteredResults = BuildScanExportClient.getListOfBuildsBetween(_since, _until) 
+    } else {
+      timeFilteredResults = BuildScanExportClient.getListOfBuildsSinceBuild(_sinceBuild)
+    }
     if(_debug) {
       print("Got ${timeFilteredResults.size()} timeFilteredResults")
     }
@@ -129,7 +152,7 @@ class BuildFilterExecutor implements GradleBuildExporter {
 //    var numOps = numEvents * _criterion.Count
 //    print("${numEvents} events will be checked against ${_criterion.Count} Predicates, for a total of ${numOps} operations")
 //    BuildMetadataUtil.dumpEventCounts(timeFilteredResults) //TODO eventCount was removed?
-    var criterionFilteredResults = BuildScanExportClient.filterByCriteria(timeFilteredResults, _criterion, _debug)
+    var criterionFilteredResults = BuildScanExportClient.filterByCriteria(timeFilteredResults, _criterion, _eventTypes, _debug)
 
     var endTime = Date.Now
     print(endTime)

@@ -3,6 +3,7 @@ package com.kylemoore
 uses com.gradle.cloudservices.buildscan.export.GroupingPublisher
 uses com.gradle.cloudservices.buildscan.export.FindFirstPublisher
 uses com.kylemoore.ge.api.Build
+uses com.kylemoore.json.BuildEvent
 uses com.kylemoore.json.BuildMetadataUtil
 uses com.kylemoore.json.UserTag
 uses ratpack.exec.ExecResult
@@ -46,12 +47,21 @@ class BuildScanExportClient {
 
   /**
    * Gets all BuildMetadata events between the provided dates (inclusive)
-   * @return List of Events; all Data properties are assignable to BuildMetadata
+   * @return List of Events; all Data properties are assignable to Build
    */
   static function getListOfBuildsBetween(from : ZonedDateTime, to : ZonedDateTime) : List<Build> {
     var builds = getListOfBuildsSince(from)
     //build.first()
     return builds.where( \ e -> e.timestamp <= to.toInstant().toEpochMilli())
+  }
+
+  /**
+   * Gets all Build events after the provided id (exclusive)
+   * @return List of Builds; all Data properties are assignable to Build
+   * @see Build
+   */
+  static function getListOfBuildsSinceBuild(buildId : String) : List<Build> {
+    return getListOfBuildsSince(buildId)
   }
   
   /**
@@ -83,30 +93,70 @@ class BuildScanExportClient {
     
     return retval.getValueOrThrow()?.whereEventTypeIs(Build) //TODO remove filter?
   }
+
+  /**
+   * Gets all BuildMetadata events since the provided date
+   * @return List of Events; all Data properties are assignable to Build
+   */
+  static function getListOfBuildsSince(buildId : String) : List<Build> {
+    var base = new URI(SERVER)
+
+    var retval = ExecHarness.yieldSingle(\ exec -> {
+      var httpClient = HttpClient.of(\ s -> s.poolSize(PARALLELISM))
+      var sseClient = ServerSentEventStreamClient.of(httpClient)
+
+      var listingUri = HttpUrlBuilder.base(base)
+          .path("build-export/v1/builds/sinceBuild")
+          .segment(buildId, {})
+//          .params({"stream", ""}) //TODO this seems to cause the connection to hang in GE 2017.3
+          .build()
+
+      return sseClient.request(listingUri, GZIP)
+          .flatMap(\ buildStream ->
+              new GroupingPublisher(buildStream, PARALLELISM)
+                  .bindExec()
+                  .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
+    })
+
+    return retval.getValueOrThrow()?.whereEventTypeIs(Build) //TODO remove filter?
+  }  
   
   static function getAllEventsForBuild(build : Build) : List<Event> {
-    return getAllEventsForBuild(build.buildId)
+    return getEventsForBuild(build.buildId, {})
   }
 
-  static function getAllEventsForBuild(publicBuildId : String) : List<Event> {
-   var base = new URI(SERVER)
+  static function getFilteredEventsForBuild(build : Build, eventTypes : Set<String>) : List<Event> {
+    return getEventsForBuild(build.buildId, eventTypes)
+  }
 
-    var buildUriFunction: block(s: String): URI = \ buildId -> HttpUrlBuilder.base(base)
+  private static function getEventsForBuild(buildId: String, eventTypes : Set<String>) : List<Event> {
+    var base = new URI(SERVER)
+
+    var queryString : Map<String, String> = {} //{"stream" -> ""}
+
+    if(eventTypes.HasElements) {
+      queryString.put("eventTypes", eventTypes.join(","))
+    }    
+    
+    var buildUriFunction: block(s: String): URI = \ id -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")
-        .segment(buildId, {})
+        .segment(id, {})
         .segment("events", {})
-        .params({"stream", ""})
+        .params(queryString)
         .build()
 
-    return ExecHarness.yieldSingle(\exec -> {
+    var execResult = ExecHarness.yieldSingle(\exec -> {
       var httpClient = HttpClient.of(\s -> s.poolSize(PARALLELISM))
       var sseClient = ServerSentEventStreamClient.of(httpClient)
 
 //      print("\nParsing build " + buildId)
-      var buildEventUri = buildUriFunction(publicBuildId)
+      var buildEventUri = buildUriFunction(buildId)
+      print("calling ${buildEventUri}")
       return sseClient.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
-    }).getValueOrThrow().where(\e -> e.Id != publicBuildId) //filter out the Build event, easily recognizable by its Id property
+    })
+    
+    return execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
   }
 
   static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : Build) : R {
@@ -148,14 +198,20 @@ class BuildScanExportClient {
     }
   }
   
-  static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, debug : boolean = false) : List<Build> {
+  static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, eventTypes : Set<String>, debug : boolean = false) : List<Build> {
     var base = new URI(SERVER)
 
+    var queryString : Map<String, Object> = {"stream" -> ""}
+    
+    if(eventTypes.HasElements) {
+      queryString.put("eventTypes", eventTypes.join(","))
+    }
+    
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")
         .segment(buildId, {})
         .segment("events", {})
-        .params({"stream", ""})
+        .params(queryString)
         .build()
     
     var retval = new ArrayList<Build>()
