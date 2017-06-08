@@ -13,14 +13,13 @@ uses ratpack.exec.util.ParallelBatch
 uses ratpack.http.HttpUrlBuilder
 uses ratpack.http.client.HttpClient
 uses ratpack.http.client.RequestSpec
+uses ratpack.server.ServerConfig
 uses ratpack.sse.Event
 uses ratpack.sse.ServerSentEventStreamClient
 uses ratpack.test.exec.ExecHarness
 
 uses java.net.URI
-uses java.time.Duration
 uses java.time.Instant
-uses java.time.temporal.ChronoUnit
 uses java.time.ZoneOffset
 uses java.time.ZonedDateTime
 
@@ -31,7 +30,10 @@ class BuildScanExportClient {
 
   static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
-  static var _httpClient = LocklessLazyVar.make(\-> HttpClient.of(\s -> s.poolSize(PARALLELISM)) )
+  static var _httpClient = LocklessLazyVar.make(\-> HttpClient.of(\s -> { 
+//    s.poolSize(PARALLELISM)
+//    s.maxContentLength(ServerConfig.DEFAULT_MAX_CONTENT_LENGTH * 2)
+  }))
   static var _sseClient = LocklessLazyVar.make(\-> ServerSentEventStreamClient.of(HTTP_CLIENT))
   
   static property get HTTP_CLIENT() : HttpClient {
@@ -157,11 +159,28 @@ class BuildScanExportClient {
 
       var buildEventUri = buildUriFunction(buildId)
       print("calling ${buildEventUri}")
-      return SSE_CLIENT.request(buildEventUri, GZIP)
-          .flatMap(\events -> events.toList())
+      var retval : Promise<List<Event>> = null
+      try {
+        retval = SSE_CLIENT.request(buildEventUri, GZIP)
+            .flatMap(\events -> events.toList())
+        print("called ${buildEventUri}")
+      } catch (e : Exception) {
+        print("failed")
+        e.printStackTrace()
+      }
+      return retval
     })
     
-    return execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
+    var retval : List<Event> = null
+    try {
+      print(execResult.isComplete() + " " + execResult.isError() + " " + execResult.isSuccess())
+      retval = execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
+    } catch (e : Exception) {
+      print("failed in getValueOrThrow()")
+      e.printStackTrace()
+    }
+
+    return retval
   }
 
   static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : Build) : R {
