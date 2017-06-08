@@ -30,10 +30,7 @@ class BuildScanExportClient {
 
   static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
-  static var _httpClient = LocklessLazyVar.make(\-> HttpClient.of(\s -> { 
-//    s.poolSize(PARALLELISM)
-//    s.maxContentLength(ServerConfig.DEFAULT_MAX_CONTENT_LENGTH * 2)
-  }))
+  static var _httpClient = LocklessLazyVar.make(\-> HttpClient.of(\spec -> {/*no-op*/} ))
   static var _sseClient = LocklessLazyVar.make(\-> ServerSentEventStreamClient.of(HTTP_CLIENT))
   
   static property get HTTP_CLIENT() : HttpClient {
@@ -159,28 +156,11 @@ class BuildScanExportClient {
 
       var buildEventUri = buildUriFunction(buildId)
       print("calling ${buildEventUri}")
-      var retval : Promise<List<Event>> = null
-      try {
-        retval = SSE_CLIENT.request(buildEventUri, GZIP)
-            .flatMap(\events -> events.toList())
-        print("called ${buildEventUri}")
-      } catch (e : Exception) {
-        print("failed")
-        e.printStackTrace()
-      }
-      return retval
+      return SSE_CLIENT.request(buildEventUri, GZIP)
+          .flatMap(\events -> events.toList())
     })
     
-    var retval : List<Event> = null
-    try {
-      print(execResult.isComplete() + " " + execResult.isError() + " " + execResult.isSuccess())
-      retval = execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
-    } catch (e : Exception) {
-      print("failed in getValueOrThrow()")
-      e.printStackTrace()
-    }
-
-    return retval
+    return execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
   }
 
   static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : Build) : R {
