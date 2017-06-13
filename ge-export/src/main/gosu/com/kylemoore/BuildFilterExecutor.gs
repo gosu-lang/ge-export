@@ -18,6 +18,8 @@ class BuildFilterExecutor implements GradleBuildExporter {
   var _until : ZonedDateTime = END_OF_TIME
   var _sinceBuild : String
   var _excludes : List<String> = {}
+  var _successOnly : boolean
+  var _failedOnly : boolean
   var _criterion : List<block(e: Event) : Boolean> = {}
   var _eventTypes : Set<String> = {}
   var _debug : boolean
@@ -112,6 +114,12 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
 
+  override function withAnythingButThisRequestedTask(task: String) : BuildFilterExecutor {
+    _eventTypes.add(BuildRequestedTasks.RelativeName)
+    _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? !e.as(BuildRequestedTasks).data.requested.disjunction({task}).Empty : null)
+    return this
+  }
+  
   override function withExactRequestedTasks(tasks: String[]) : BuildFilterExecutor {
     _eventTypes.add(BuildRequestedTasks.RelativeName)
     _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.disjunction(tasks.toList()).Empty : null)
@@ -124,11 +132,26 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
 
-//  function withStatus(status: String) : BuildFilterExecutor {
-//    _criterion.add( \ e -> e.TypeMatches(OutputStyledTextEvent_1_0)) ... //TODO implement
-//    return this
-//  }
+  override function withSuccessfulBuildsOnly() : BuildFilterExecutor {
+    if(_failedOnly) {
+      throw new IllegalStateException("Cannot be used in conjunction with #withFailedBuildsOnly()")
+    }
+    _eventTypes.add(BuildFinished.RelativeName)
+    _criterion.add(\ e -> e.TypeMatches(BuildFinished) ? e.as(BuildFinished).data.failure == null : null)
+    _successOnly = true
+    return this
+  }
 
+  override function withFailedBuildsOnly() : BuildFilterExecutor {
+    if(_successOnly) {
+      throw new IllegalStateException("Cannot be used in conjunction with #withSuccessfulBuildsOnly()")
+    }
+    _eventTypes.add(BuildFinished.RelativeName)
+    _criterion.add(\ e -> e.TypeMatches(BuildFinished) ? e.as(BuildFinished).data.failure != null : null)
+    _failedOnly = true
+    return this
+  }  
+  
   override function withDebugLogging() : BuildFilterExecutor {
     _debug = true
     return this

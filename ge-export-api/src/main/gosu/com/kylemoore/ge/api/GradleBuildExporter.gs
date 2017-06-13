@@ -41,6 +41,12 @@ interface GradleBuildExporter {
   function withRequestedTask(task: String) : GradleBuildExporter
 
   /**
+   * @param task
+   * @return Builds explicitly not requesting this sole task. This is an inversion of {@link #withRequestedTask(String)} 
+   */
+  function withAnythingButThisRequestedTask(task: String) : GradleBuildExporter  
+  
+  /**
    * @param tasks
    * @return Builds explicitly requesting this exact list of tasks. Order doesn't matter.
    */
@@ -51,6 +57,18 @@ interface GradleBuildExporter {
    * @return Builds explicitly requesting any of these tasks.
    */
   function withAnyRequestedTasks(tasks: String[]) : GradleBuildExporter
+
+  /**
+   * @return Successful builds only.
+   * @throws IllegalStateException if used in conjunction with {@link #withFailedBuildsOnly() withFailedBuildsOnly}
+   */
+  function withSuccessfulBuildsOnly() : GradleBuildExporter
+
+  /**
+   * @return Failed builds only.
+   * @throws IllegalStateException if used in conjunction with {@link #withSuccessfulBuildsOnly() withSuccessfulBuildsOnly}
+   */
+  function withFailedBuildsOnly() : GradleBuildExporter
 
   function withDebugLogging() : GradleBuildExporter
 
