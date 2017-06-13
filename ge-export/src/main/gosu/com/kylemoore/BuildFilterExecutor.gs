@@ -59,6 +59,7 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
 
   override function withTags(tags: String[]) : BuildFilterExecutor {
+    _eventTypes.add(UserTag.RelativeName)
     for(tag in tags) {
       _criterion.add( \ e -> e.TypeMatches(UserTag) and e.as(UserTag).data.tag == tag ? true : null )
     }
@@ -66,6 +67,7 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
 
   override function withProjectName(name: String) : BuildFilterExecutor {
+    _eventTypes.add(ProjectStructure.RelativeName)
     _criterion.add( \ e -> e.TypeMatches(ProjectStructure) ? e.as(ProjectStructure).data.rootProjectName == name : null )
     return this
   }
@@ -76,21 +78,25 @@ class BuildFilterExecutor implements GradleBuildExporter {
    * @return
    */
   override function withOsFamily(family: String) : BuildFilterExecutor {
+    _eventTypes.add(Os.RelativeName)
     _criterion.add( \ e -> e.TypeMatches(Os) ? e.as(Os).data.family == family : null )
     return this
   }
 
   override function withUsername(username: String) : BuildFilterExecutor {
+    _eventTypes.add(BuildAgent.RelativeName)
     _criterion.add( \ e -> e.TypeMatches(BuildAgent) ? e.as(BuildAgent).data.username == username : null )
     return this
   }
 
   override function withHostname(hostname: String) : BuildFilterExecutor {
+    _eventTypes.add(BuildAgent.RelativeName)
     _criterion.add( \ e -> e.TypeMatches(BuildAgent) ? e.as(BuildAgent).data.publicHostname == hostname : null )
     return this
   }
 
   override function withCustomValue(key: String, value: String) : BuildFilterExecutor {
+    _eventTypes.add(UserNamedValue.RelativeName)
     _criterion.add( \ e -> e.TypeMatches(UserNamedValue) and e.as(UserNamedValue).data.key == key ? e.as(UserNamedValue).data.value == value : null )
     return this
   }
@@ -101,11 +107,13 @@ class BuildFilterExecutor implements GradleBuildExporter {
   }
 
   override function withRequestedTask(task: String) : BuildFilterExecutor {
+    _eventTypes.add(BuildRequestedTasks.RelativeName)
     _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.contains(task) : null)
     return this
   }
 
   override function withExactRequestedTasks(tasks: String[]) : BuildFilterExecutor {
+    _eventTypes.add(BuildRequestedTasks.RelativeName)
     _criterion.add(\ e -> e.TypeMatches(BuildRequestedTasks) ? e.as(BuildRequestedTasks).data.requested.disjunction(tasks.toList()).Empty : null)
     return this
   }

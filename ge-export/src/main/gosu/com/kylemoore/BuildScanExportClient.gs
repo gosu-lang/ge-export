@@ -139,11 +139,13 @@ class BuildScanExportClient {
   private static function getEventsForBuild(buildId: String, eventTypes : Set<String>) : List<Event> {
     var base = new URI(SERVER)
 
-    var queryString : Map<String, String> = {} //{"stream" -> ""}
+    var queryString : Map<String, String> = {}
 
     if(eventTypes.HasElements) {
       queryString.put("eventTypes", eventTypes.join(","))
-    }    
+    }
+
+    //queryString.put("stream", "")
     
     var buildUriFunction: block(s: String): URI = \ id -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")
@@ -155,7 +157,7 @@ class BuildScanExportClient {
     var execResult = ExecHarness.yieldSingle(\exec -> {
 
       var buildEventUri = buildUriFunction(buildId)
-      print("calling ${buildEventUri}")
+//      print("calling ${buildEventUri}")
       return SSE_CLIENT.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
     })
@@ -174,7 +176,7 @@ class BuildScanExportClient {
         .path("build-export/v1/build")
         .segment(buildId, {})
         .segment("events", {})
-        .params({"stream", ""})
+//        .params({"stream", ""})
         .build()
     
     //var eventForSubtype: block(event : Object): Event = \ e -> (e as Event).Event == eventType.RelativeName ? (e as Event) : null
@@ -203,11 +205,13 @@ class BuildScanExportClient {
   static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, eventTypes : Set<String>, debug : boolean = false) : List<Build> {
     var base = new URI(SERVER)
 
-    var queryString : Map<String, Object> = {"stream" -> ""}
+    var queryString : Map<String, String> = {}
     
     if(eventTypes.HasElements) {
       queryString.put("eventTypes", eventTypes.join(","))
     }
+    
+//    queryString.put("stream", "")
     
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
         .path("build-export/v1/build")

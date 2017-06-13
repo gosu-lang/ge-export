@@ -15,4 +15,12 @@ interface BuildMetadataUtil {
   function GosuCompilationTime(build: Build) : Duration
 
   function URL(build: Build) : URL
+  
+  function Hostname(build: Build) : String
+  
+  function Os(build: Build) : String
+  
+  function RequestedTasks(build: Build) : List<String>
+
+  function Success(build: Build) : boolean
 }

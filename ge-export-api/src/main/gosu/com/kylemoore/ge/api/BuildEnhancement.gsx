@@ -25,5 +25,21 @@ enhancement BuildEnhancement: Build {
   property get URL() : URL {
     return ServiceFactory.BuildMetadataUtilImpl.URL(this)
   }
+  
+  property get Hostname() : String {
+    return ServiceFactory.BuildMetadataUtilImpl.Hostname(this)
+  }
 
+  property get Os() : String {
+    return ServiceFactory.BuildMetadataUtilImpl.Os(this)
+  }
+  
+  property get RequestedTasks() : List<String> {
+    return ServiceFactory.BuildMetadataUtilImpl.RequestedTasks(this)
+  }
+  
+  property get Success() : boolean {
+    return ServiceFactory.BuildMetadataUtilImpl.Success(this)
+  }
+  
 }

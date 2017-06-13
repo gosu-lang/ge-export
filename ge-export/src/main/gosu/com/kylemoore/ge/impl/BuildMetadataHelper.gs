@@ -3,8 +3,11 @@ package com.kylemoore.ge.impl
 uses com.kylemoore.BuildScanExportClient
 uses com.kylemoore.ge.api.Build
 uses com.kylemoore.ge.api.BuildMetadataUtil
+uses com.kylemoore.json.BuildAgent
 uses com.kylemoore.json.BuildFinished
+uses com.kylemoore.json.BuildRequestedTasks
 uses com.kylemoore.json.BuildStarted
+uses com.kylemoore.json.Os
 uses com.kylemoore.json.TaskFinished
 uses com.kylemoore.json.TaskStarted
 
@@ -53,7 +56,47 @@ class BuildMetadataHelper implements BuildMetadataUtil {
   override function URL(build: Build): URL {
     return new URL(BuildScanExportClient.SERVER + "/s/" + build.buildId)
   }
+  
+  override function Hostname(build: Build): String {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {BuildAgent.RelativeName}) //TODO if passing 1 event type, this could be strongly types
 
+    return events
+        .whereEventTypeIs(BuildAgent)
+        .single()
+        .data
+        .publicHostname
+  }
+  
+  override function Os(build: Build): String {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {Os.RelativeName}) //TODO if passing 1 event type, this could be strongly types
+
+    return events
+        .whereEventTypeIs(Os)
+        .single()
+        .data
+        .family
+  }
+  
+  override function RequestedTasks(build: Build): List<String> {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {BuildRequestedTasks.RelativeName}) //TODO if passing 1 event type, this could be strongly types
+
+    return events
+        .whereEventTypeIs(BuildRequestedTasks)
+        .single()
+        .data
+        .requested
+  }
+
+  override function Success(build: Build): boolean {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, {BuildFinished.RelativeName}) //TODO if passing 1 event type, this could be strongly types
+
+    return events
+        .whereEventTypeIs(BuildFinished)
+        .single()
+        .data
+        .failure == null
+  }
+  
   private function getAbstractTaskDuration(build: Build, suffix: String) : Duration {
     var events = BuildScanExportClient.getFilteredEventsForBuild(build, {TaskStarted.RelativeName, TaskFinished.RelativeName})
 
