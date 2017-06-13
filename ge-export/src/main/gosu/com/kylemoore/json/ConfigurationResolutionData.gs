@@ -24,18 +24,10 @@ structure ConfigurationResolutionData {
   property get type(): type
   property get timestamp(): Long
   structure data {
-    property get components(): components
-    property get identities(): identities
-    property get failures(): failures
-    property get dependencies(): dependencies
-    structure components {
-    }
-    structure identities {
-    }
-    structure failures {
-    }
-    structure dependencies {
-    }
+    property get components(): Map<Long, Component>
+    property get identities(): Map<Long, ComponentDependency>
+    property get failures(): Map<Long, ExceptionTree>
+    property get dependencies(): Map<Long, ComponentIdentity>
   }
   structure type {
     property get eventType(): String

@@ -24,7 +24,7 @@ structure BuildFinished {
   property get type(): type
   property get timestamp(): Long
   structure data {
-    property get failure(): Dynamic
+    property get failure(): ExceptionTree
   }
   structure type {
     property get eventType(): String

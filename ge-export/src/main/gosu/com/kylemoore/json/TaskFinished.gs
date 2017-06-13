@@ -26,11 +26,11 @@ structure TaskFinished {
   structure data {
     property get path(): String
     property get cachingDisabledReason(): Dynamic
-    property get cachingDisabledExplanation(): Dynamic
+    property get cachingDisabledExplanation(): String
     property get cacheable(): Boolean
     property get id(): Long
     property get outcome(): String
-    property get skipMessage(): Dynamic
+    property get skipMessage(): String
   }
   structure type {
     property get eventType(): String
