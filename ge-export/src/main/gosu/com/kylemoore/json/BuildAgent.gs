@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure BuildAgent {
+structure BuildAgent extends BuildEvent {
   static function fromJson(jsonText: String): BuildAgent {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as BuildAgent
   }
@@ -20,18 +20,11 @@ structure BuildAgent {
   static function fromJsonFile(file: java.io.File) : BuildAgent {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
-    property get localHostname(): Dynamic
+    property get localHostname(): String
     property get publicHostname(): String
     property get ipAddresses(): List<String>
     property get username(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

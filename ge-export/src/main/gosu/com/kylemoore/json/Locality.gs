@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure Locality {
+structure Locality extends BuildEvent {
   static function fromJson(jsonText: String): Locality {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as Locality
   }
@@ -20,19 +20,12 @@ structure Locality {
   static function fromJsonFile(file: java.io.File) : Locality {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get localeLanguage(): String
     property get localeVariant(): String
     property get timeZoneId(): String
     property get localeCountry(): String
     property get timeZoneOffsetMillis(): Integer
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

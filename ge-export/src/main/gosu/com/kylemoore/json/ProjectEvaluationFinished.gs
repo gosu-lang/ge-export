@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ProjectEvaluationFinished {
+structure ProjectEvaluationFinished extends BuildEvent {
   static function fromJson(jsonText: String): ProjectEvaluationFinished {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ProjectEvaluationFinished
   }
@@ -20,16 +20,9 @@ structure ProjectEvaluationFinished {
   static function fromJsonFile(file: java.io.File) : ProjectEvaluationFinished {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get projectPath(): String
-    property get failure(): Dynamic
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
+    property get failure(): ExceptionTree
   }
 }

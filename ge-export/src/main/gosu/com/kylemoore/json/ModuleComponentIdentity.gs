@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ModuleComponentIdentity extends ComponentIdentity {
+structure ModuleComponentIdentity extends ComponentIdentity, BuildEvent {
   static function fromJson(jsonText: String): ModuleComponentIdentity {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ModuleComponentIdentity
   }
@@ -20,17 +20,10 @@ structure ModuleComponentIdentity extends ComponentIdentity {
   static function fromJsonFile(file: java.io.File) : ModuleComponentIdentity {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get group(): String
     property get artifact(): String
     property get version(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

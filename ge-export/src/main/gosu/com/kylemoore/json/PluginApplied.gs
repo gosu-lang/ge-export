@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure PluginApplied {
+structure PluginApplied extends BuildEvent {
   static function fromJson(jsonText: String): PluginApplied {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as PluginApplied
   }
@@ -20,19 +20,12 @@ structure PluginApplied {
   static function fromJsonFile(file: java.io.File) : PluginApplied {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get inferredVersion(): String
     property get pluginClassName(): String
     property get codeSourceType(): String
     property get projectPath(): String
     property get inferredId(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

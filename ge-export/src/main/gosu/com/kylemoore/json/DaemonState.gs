@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure DaemonState {
+structure DaemonState extends BuildEvent {
   static function fromJson(jsonText: String): DaemonState {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as DaemonState
   }
@@ -20,18 +20,11 @@ structure DaemonState {
   static function fromJsonFile(file: java.io.File) : DaemonState {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get idleTimeout(): Integer
     property get numberOfRunningDaemons(): Integer
     property get startTime(): Long
     property get buildNumber(): Integer
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

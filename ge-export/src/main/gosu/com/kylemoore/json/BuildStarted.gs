@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure BuildStarted {
+structure BuildStarted extends BuildEvent {
   static function fromJson(jsonText: String): BuildStarted {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as BuildStarted
   }
@@ -20,14 +20,6 @@ structure BuildStarted {
   static function fromJsonFile(file: java.io.File) : BuildStarted {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
-  structure data {
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
-  }
+
+  structure data {}
 }

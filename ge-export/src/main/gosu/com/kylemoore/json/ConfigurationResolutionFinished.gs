@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ConfigurationResolutionFinished {
+structure ConfigurationResolutionFinished extends BuildEvent {
   static function fromJson(jsonText: String): ConfigurationResolutionFinished {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ConfigurationResolutionFinished
   }
@@ -20,16 +20,9 @@ structure ConfigurationResolutionFinished {
   static function fromJsonFile(file: java.io.File) : ConfigurationResolutionFinished {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get id(): Long
     property get result(): ConfigurationResolutionResult
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

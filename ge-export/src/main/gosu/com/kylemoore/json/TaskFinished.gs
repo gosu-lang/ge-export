@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 3
  *
  */
-structure TaskFinished {
+structure TaskFinished extends BuildEvent {
   static function fromJson(jsonText: String): TaskFinished {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskFinished
   }
@@ -20,21 +20,14 @@ structure TaskFinished {
   static function fromJsonFile(file: java.io.File) : TaskFinished {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get path(): String
-    property get cachingDisabledReason(): Dynamic
+    property get cachingDisabledReason(): String //TODO maybe make enum for TaskOutputCachingDisabledReason?
     property get cachingDisabledExplanation(): String
     property get cacheable(): Boolean
     property get id(): Long
     property get outcome(): String
     property get skipMessage(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

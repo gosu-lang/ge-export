@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ResolvedRequestedTaskPaths {
+structure ResolvedRequestedTaskPaths extends BuildEvent {
   static function fromJson(jsonText: String): ResolvedRequestedTaskPaths {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ResolvedRequestedTaskPaths
   }
@@ -20,15 +20,8 @@ structure ResolvedRequestedTaskPaths {
   static function fromJsonFile(file: java.io.File) : ResolvedRequestedTaskPaths {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get requestedTaskPaths(): List<String>
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

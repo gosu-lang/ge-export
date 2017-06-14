@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure StackFrame {
+structure StackFrame extends BuildEvent {
   static function fromJson(jsonText: String): StackFrame {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as StackFrame
   }
@@ -20,18 +20,11 @@ structure StackFrame {
   static function fromJsonFile(file: java.io.File) : StackFrame {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get declaringClass(): String
     property get fileName(): String
     property get lineNumber(): Integer
     property get methodName(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure BuildRequestedTasks {
+structure BuildRequestedTasks extends BuildEvent {
   static function fromJson(jsonText: String): BuildRequestedTasks {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as BuildRequestedTasks
   }
@@ -20,16 +20,9 @@ structure BuildRequestedTasks {
   static function fromJsonFile(file: java.io.File) : BuildRequestedTasks {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
-    property get excluded(): List<Dynamic>
+    property get excluded(): List<String>
     property get requested(): List<String>
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

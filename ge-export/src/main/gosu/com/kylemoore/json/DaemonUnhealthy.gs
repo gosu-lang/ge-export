@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure DaemonUnhealthy {
+structure DaemonUnhealthy extends BuildEvent {
   static function fromJson(jsonText: String): DaemonUnhealthy {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as DaemonUnhealthy
   }
@@ -20,15 +20,8 @@ structure DaemonUnhealthy {
   static function fromJsonFile(file: java.io.File) : DaemonUnhealthy {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get reason(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

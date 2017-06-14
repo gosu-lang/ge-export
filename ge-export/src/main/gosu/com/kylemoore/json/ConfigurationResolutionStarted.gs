@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ConfigurationResolutionStarted {
+structure ConfigurationResolutionStarted extends BuildEvent {
   static function fromJson(jsonText: String): ConfigurationResolutionStarted {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ConfigurationResolutionStarted
   }
@@ -20,9 +20,7 @@ structure ConfigurationResolutionStarted {
   static function fromJsonFile(file: java.io.File) : ConfigurationResolutionStarted {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get configurationName(): String
     property get description(): String
@@ -30,10 +28,5 @@ structure ConfigurationResolutionStarted {
     property get projectPath(): String
     property get transitive(): Boolean
     property get visible(): Boolean
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

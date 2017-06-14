@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure UserTag {
+structure UserTag extends BuildEvent {
   static function fromJson( jsonText: String ): UserTag {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as UserTag
   }
@@ -20,15 +20,8 @@ structure UserTag {
   static function fromJsonFile( file: java.io.File ) : UserTag {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get tag(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 2
  *
  */
-structure TaskStarted {
+structure TaskStarted extends BuildEvent {
   static function fromJson(jsonText: String): TaskStarted {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as TaskStarted
   }
@@ -20,19 +20,12 @@ structure TaskStarted {
   static function fromJsonFile(file: java.io.File) : TaskStarted {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get path(): String
     property get className(): String
     property get id(): Long
     property get thread(): Integer
     property get noActions(): Boolean
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

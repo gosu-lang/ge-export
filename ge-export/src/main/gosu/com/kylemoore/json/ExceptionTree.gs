@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure ExceptionTree {
+structure ExceptionTree extends BuildEvent {
   static function fromJson(jsonText: String): ExceptionTree {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as ExceptionTree
   }
@@ -20,15 +20,8 @@ structure ExceptionTree {
   static function fromJsonFile(file: java.io.File) : ExceptionTree {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get exceptions(): List<Exception>
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

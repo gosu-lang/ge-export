@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure NetworkDownloadActivityFinished {
+structure NetworkDownloadActivityFinished extends BuildEvent {
   static function fromJson(jsonText: String): NetworkDownloadActivityFinished {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as NetworkDownloadActivityFinished
   }
@@ -20,16 +20,9 @@ structure NetworkDownloadActivityFinished {
   static function fromJsonFile(file: java.io.File) : NetworkDownloadActivityFinished {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get failure(): ExceptionTree
     property get id(): Long
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

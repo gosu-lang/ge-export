@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure Os {
+structure Os extends BuildEvent {
   static function fromJson(jsonText: String): Os {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as Os
   }
@@ -20,18 +20,11 @@ structure Os {
   static function fromJsonFile(file: java.io.File) : Os {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get name(): String
     property get arch(): String
     property get family(): String
     property get version(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

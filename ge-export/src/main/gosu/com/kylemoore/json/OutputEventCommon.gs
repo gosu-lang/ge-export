@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure OutputEventCommon {
+structure OutputEventCommon extends BuildEvent {
   static function fromJson(jsonText: String): OutputEventCommon {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as OutputEventCommon
   }
@@ -20,16 +20,9 @@ structure OutputEventCommon {
   static function fromJsonFile(file: java.io.File) : OutputEventCommon {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get output(): String
     property get logLevel(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

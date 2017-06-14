@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure Exception {
+structure Exception extends BuildEvent {
   static function fromJson(jsonText: String): Exception {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as Exception
   }
@@ -20,19 +20,12 @@ structure Exception {
   static function fromJsonFile(file: java.io.File) : Exception {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get causes(): List<Integer>
     property get classLevelAnnotations(): List<String>
     property get className(): String
     property get metadata(): Map<String, String>
     property get stacktrace(): List<StackFrame>
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

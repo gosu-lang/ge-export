@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure Jvm {
+structure Jvm extends BuildEvent {
   static function fromJson(jsonText: String): Jvm {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as Jvm
   }
@@ -20,9 +20,7 @@ structure Jvm {
   static function fromJsonFile(file: java.io.File) : Jvm {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get runtimeVersion(): String
     property get vmName(): String
@@ -33,10 +31,5 @@ structure Jvm {
     property get vmVendor(): String
     property get vmInfo(): String
     property get version(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

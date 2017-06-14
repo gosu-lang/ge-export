@@ -1,5 +1,7 @@
 package com.kylemoore.json
 
+uses java.net.URL
+
 /**
  * Handmade by Kyle
  * name: UserLink
@@ -7,7 +9,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure UserLink {
+structure UserLink extends BuildEvent {
   static function fromJson(jsonText: String): UserLink {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as UserLink
   }
@@ -20,16 +22,9 @@ structure UserLink {
   static function fromJsonFile(file: java.io.File) : UserLink {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get label(): String
-    property get url(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
+    property get url(): URL //TODO will a string be automatically coerced to URL?
   }
 }

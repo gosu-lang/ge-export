@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure UserNamedValue {
+structure UserNamedValue extends BuildEvent {
   static function fromJson( jsonText: String ): UserNamedValue {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as UserNamedValue
   }
@@ -20,16 +20,9 @@ structure UserNamedValue {
   static function fromJsonFile( file: java.io.File ) : UserNamedValue {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get value(): String
     property get key(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }

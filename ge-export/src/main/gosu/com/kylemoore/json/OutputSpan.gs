@@ -7,7 +7,7 @@ package com.kylemoore.json
  * minorVersion: 0
  *
  */
-structure OutputSpan {
+structure OutputSpan extends BuildEvent {
   static function fromJson(jsonText: String): OutputSpan {
     return gw.lang.reflect.json.Json.fromJson( jsonText ) as OutputSpan
   }
@@ -20,16 +20,9 @@ structure OutputSpan {
   static function fromJsonFile(file: java.io.File) : OutputSpan {
     return fromJsonUrl( file.toURI().toURL() )
   }
-  property get data(): data
-  property get type(): type
-  property get timestamp(): Long
+
   structure data {
     property get style(): String
     property get text(): String
-  }
-  structure type {
-    property get eventType(): String
-    property get majorVersion(): Integer
-    property get minorVersion(): Integer
   }
 }
