@@ -40,9 +40,15 @@ class BuildScanExportClient {
   static property get SSE_CLIENT() : ServerSentEventStreamClient {
     return _sseClient.get()
   }
-  
+
+
+  /**
+   * @deprecated currently unused
+   * @param buildId
+   * @return
+   */
   static function getBuildById(buildId : String) : Build {
-    return getFirstEventForBuild(Build, buildId)
+    return null //getFirstEventForBuild(Build, buildId)
   }
 
   static function getMostRecentBuilds(n : int) : List<Build> {
@@ -100,7 +106,7 @@ class BuildScanExportClient {
                   .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
     
-    return retval.getValueOrThrow()?.whereEventTypeIs(Build) //TODO remove filter?
+    return retval.getValueOrThrow().map(\event -> event.Json )
   }
 
   /**
@@ -125,24 +131,32 @@ class BuildScanExportClient {
                   .toPromise()) //Note: if the result set exceeds the PARALLELISM value, it will be partitioned into sublists. Use toList() here or increase PARALLELISM. 
     })
 
-    return retval.getValueOrThrow()?.whereEventTypeIs(Build) //TODO remove filter?
+    return retval.getValueOrThrow().map(\event -> event.Json)
   }  
   
-  static function getAllEventsForBuild(build : Build) : List<Event> {
+  static reified function getAllEventsForBuild<R extends BuildEvent>(build : Build) : List<R> {
     return getEventsForBuild(build.buildId, {})
   }
 
-  static function getFilteredEventsForBuild(build : Build, eventTypes : Set<String>) : List<Event> {
-    return getEventsForBuild(build.buildId, eventTypes)
+  static reified function getFilteredEventsForBuild<R extends BuildEvent>(build : Build, eventType : Type<R>) : List<R> {
+    return getEventsForBuild(build.buildId, {eventType})
   }
 
-  private static function getEventsForBuild(buildId: String, eventTypes : Set<String>) : List<Event> {
+  static reified function getFilteredEventsForBuild<R extends BuildEvent>(build : Build, eventTypes : Set<Type<R>>) : List<R> {
+    return getEventsForBuild(build.buildId, eventTypes)
+  }
+  
+//  static function getFilteredEventsForBuild<R extends BuildEvent>(build : Build, eventType : Type<R>) : List<R> {
+//    return getEventsForBuild(build.buildId, eventTypes)
+//  }
+  
+  private reified static function getEventsForBuild<R extends BuildEvent>(buildId: String, eventTypes : Set<Type<R>>) : List<R> {
     var base = new URI(SERVER)
 
     var queryString : Map<String, String> = {}
 
     if(eventTypes.HasElements) {
-      queryString.put("eventTypes", eventTypes.join(","))
+      queryString.put("eventTypes", eventTypes*.RelativeName.join(","))
     }
 
     //queryString.put("stream", "")
@@ -157,19 +171,26 @@ class BuildScanExportClient {
     var execResult = ExecHarness.yieldSingle(\exec -> {
 
       var buildEventUri = buildUriFunction(buildId)
-//      print("calling ${buildEventUri}")
+//      print("calling ${buildEventUri}") //TODO debug logging
       return SSE_CLIENT.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
     })
     
-    return execResult.getValueOrThrow().where(\e -> e.Id != buildId) //filter out the Build event, easily recognizable by its Id property
+    return execResult.getValueOrThrow().where(\e -> e.Id != buildId).map( \e -> e.Json )
   }
 
-  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, build : Build) : R {
+  /**
+   * @deprecated currently unused
+   * @param eventType
+   * @param build
+   * @param <R>
+   * @return
+   */
+  static reified function getFirstEventForBuild<R extends BuildEvent>(eventType : Type<R>, build : Build) : R {
     return BuildScanExportClient.getFirstEventForBuild(eventType, build.buildId)
   }
   
-  static reified function getFirstEventForBuild<R extends Dynamic>(eventType : Type<R>, publicBuildId : String) : R {
+  static reified function getFirstEventForBuild<R extends BuildEvent>(eventType : Type<R>, publicBuildId : String) : R {
     var base = new URI(SERVER)
 
     var buildUriFunction(buildId: String): URI = \ buildId -> HttpUrlBuilder.base(base)
@@ -202,13 +223,13 @@ class BuildScanExportClient {
     }
   }
   
-  static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, eventTypes : Set<String>, debug : boolean = false) : List<Build> {
+  static function filterByCriteria(builds : List<Build>, criteria : List<block(e: Event) : Boolean>, eventTypes : Set<Type<BuildEvent>>, debug : boolean = false) : List<Build> {
     var base = new URI(SERVER)
 
     var queryString : Map<String, String> = {}
     
     if(eventTypes.HasElements) {
-      queryString.put("eventTypes", eventTypes.join(","))
+      queryString.put("eventTypes", eventTypes*.RelativeName.join(","))
     }
     
 //    queryString.put("stream", "")

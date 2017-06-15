@@ -5,7 +5,7 @@ package com.kylemoore.json
  * name: BuildEvent
  *
  */
-abstract structure BuildEvent {
+structure BuildEvent {
 
   property get timestamp(): Long
   property get data(): Dynamic
