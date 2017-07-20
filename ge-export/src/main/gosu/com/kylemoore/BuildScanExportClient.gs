@@ -243,16 +243,18 @@ class BuildScanExportClient {
     
     var retval = new ArrayList<Build>()
     
-    for(build in builds) {
-      var result = ExecHarness.yieldSingle( \ exec -> {
-        var buildEventUri = buildUriFunction(build.buildId)
+    if(criteria.HasElements) { //no need to evaluate an empty list of criteria against all builds
+      for (build in builds) {
+        var result = ExecHarness.yieldSingle(\exec -> {
+          var buildEventUri = buildUriFunction(build.buildId)
 
-        return SSE_CLIENT.request(buildEventUri, GZIP)
-            .flatMap( \ events -> new MatchingCriteriaPublisher(events/* as ratpack.stream.TransformablePublisher<Event>*/, criteria, build.buildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
-      }).ValueOrThrow
-      
-      if(result != null) {
-        retval.add(build)
+          return SSE_CLIENT.request(buildEventUri, GZIP)
+              .flatMap(\events -> new MatchingCriteriaPublisher(events/* as ratpack.stream.TransformablePublisher<Event>*/, criteria, build.buildId, debug).toPromise()) //IJ parser is mad w/o casting "events as TP<Event>", but it works
+        }).ValueOrThrow
+
+        if (result != null) {
+          retval.add(build)
+        }
       }
     }
     
