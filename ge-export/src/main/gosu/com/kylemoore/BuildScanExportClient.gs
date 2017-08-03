@@ -149,7 +149,7 @@ class BuildScanExportClient {
 //    return getEventsForBuild(build.buildId, eventTypes)
 //  }
   
-  private reified static function getEventsForBuild<R extends BuildEvent>(buildId: String, eventTypes : Set<Type<R>>) : List<R> {
+  private reified static function getEventsForBuild<R extends BuildEvent>(buildId: String, eventTypes : Set<Type<R>>, debug : boolean = false) : List<R> {
     var base = new URI(SERVER)
 
     var queryString : Map<String, String> = {}
@@ -170,7 +170,9 @@ class BuildScanExportClient {
     var execResult = ExecHarness.yieldSingle(\exec -> {
 
       var buildEventUri = buildUriFunction(buildId)
-//      print("calling ${buildEventUri}") //TODO debug logging
+      if(debug) {
+        print("calling ${buildEventUri}") //TODO debug logging
+      }
       return SSE_CLIENT.request(buildEventUri, GZIP)
           .flatMap(\events -> events.toList())
     })
