@@ -29,6 +29,10 @@ enhancement BuildEnhancement: Build {
   property get Hostname() : String {
     return ServiceFactory.BuildMetadataUtilImpl.Hostname(this)
   }
+  
+  property get Username() : String {
+    return ServiceFactory.BuildMetadataUtilImpl.Username(this)
+  }
 
   property get Os() : String {
     return ServiceFactory.BuildMetadataUtilImpl.Os(this)
@@ -40,6 +44,10 @@ enhancement BuildEnhancement: Build {
   
   property get Success() : boolean {
     return ServiceFactory.BuildMetadataUtilImpl.Success(this)
+  }
+  
+  property get Project() : String {
+    return ServiceFactory.BuildMetadataUtilImpl.Project(this)
   }
   
 }

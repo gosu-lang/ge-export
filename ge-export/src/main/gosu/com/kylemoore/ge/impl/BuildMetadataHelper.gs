@@ -9,6 +9,7 @@ uses com.kylemoore.json.BuildFinished
 uses com.kylemoore.json.BuildRequestedTasks
 uses com.kylemoore.json.BuildStarted
 uses com.kylemoore.json.Os
+uses com.kylemoore.json.ProjectStructure
 uses com.kylemoore.json.TaskFinished
 uses com.kylemoore.json.TaskStarted
 
@@ -64,6 +65,15 @@ class BuildMetadataHelper implements BuildMetadataUtil {
         .data
         .publicHostname
   }
+
+  override function Username(build: Build): String {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, BuildAgent)
+
+    return events
+        .single()
+        .data
+        .username
+  }
   
   override function Os(build: Build): String {
     var events = BuildScanExportClient.getFilteredEventsForBuild(build, Os)
@@ -90,6 +100,15 @@ class BuildMetadataHelper implements BuildMetadataUtil {
         .single()
         .data
         .failure == null
+  }
+
+  override function Project(build: Build): String {
+    var events = BuildScanExportClient.getFilteredEventsForBuild(build, ProjectStructure)
+
+    return events
+        .single()
+        .data
+        .rootProjectName
   }
   
   private function getAbstractTaskDuration(build: Build, suffix: String) : Duration {
