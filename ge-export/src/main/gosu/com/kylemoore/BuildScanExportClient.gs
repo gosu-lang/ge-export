@@ -19,6 +19,7 @@ uses ratpack.sse.ServerSentEventStreamClient
 uses ratpack.test.exec.ExecHarness
 
 uses java.net.URI
+uses java.time.Duration
 uses java.time.Instant
 uses java.time.ZoneOffset
 uses java.time.ZonedDateTime
@@ -30,17 +31,15 @@ class BuildScanExportClient {
 
   static final var _gzip : block(rs:RequestSpec) : void as readonly GZIP = \ rs -> rs.getHeaders().set("Accept-Encoding", "gzip")
 
-  static var _httpClient = LocklessLazyVar.make(\-> HttpClient.of(\spec -> {/*no-op*/} ))
-  static var _sseClient = LocklessLazyVar.make(\-> ServerSentEventStreamClient.of(HTTP_CLIENT))
-  
-  static property get HTTP_CLIENT() : HttpClient {
-    return _httpClient.get()
-  }
-  
-  static property get SSE_CLIENT() : ServerSentEventStreamClient {
-    return _sseClient.get()
+  private static property get HTTP_CLIENT() : HttpClient {
+    return HttpClient.of(\spec -> { /*no-op*/} )
   }
 
+  //static var _sseClient = LocklessLazyVar.make(\-> ServerSentEventStreamClient.of(HTTP_CLIENT))
+  
+  static property get SSE_CLIENT() : ServerSentEventStreamClient {
+    return ServerSentEventStreamClient.of(HTTP_CLIENT)
+  }
 
   /**
    * @deprecated currently unused
