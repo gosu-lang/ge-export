@@ -59,6 +59,17 @@ class BuildFilterExecutor implements GradleBuildExporter {
     return this
   }
 
+  override function excludingBuildsByUser(username: String) : BuildFilterExecutor {
+    excludingBuildsByUsers({username})
+    return this
+  }
+
+  override function excludingBuildsByUsers(usernames: String[]) : BuildFilterExecutor {
+    _eventTypes.add(BuildAgent)
+    _criterion.add( \ e -> e.TypeMatches(BuildAgent) ? !usernames.contains(e.as(BuildAgent).data.username) : null )
+    return this
+  }  
+  
   override function withTags(tags: String[]) : BuildFilterExecutor {
     _eventTypes.add(UserTag)
     for(tag in tags) {

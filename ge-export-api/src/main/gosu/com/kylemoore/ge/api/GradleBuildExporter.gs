@@ -18,6 +18,10 @@ interface GradleBuildExporter {
 
   function excluding(buildPublicIds : String[]) : GradleBuildExporter
 
+  function excludingBuildsByUser(username : String) : GradleBuildExporter
+  
+  function excludingBuildsByUsers(usernames : String[]) : GradleBuildExporter
+
   function withTag(tag: String) : GradleBuildExporter
 
   function withTags(tags: String[]) : GradleBuildExporter
